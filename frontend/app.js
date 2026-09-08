@@ -251,8 +251,15 @@ async function submitUpload() {
     });
 
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.detail || 'Upload failed');
+      let errMsg = 'Upload failed';
+      try {
+        const errData = await res.json();
+        errMsg = errData.detail || errMsg;
+      } catch {
+        const rawText = await res.text();
+        errMsg = rawText || errMsg;
+      }
+      throw new Error(errMsg);
     }
 
     const result = await res.json();

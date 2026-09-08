@@ -8,6 +8,7 @@ Implements multi-tier epistemic resolution:
 """
 
 import math
+from collections import defaultdict
 from typing import List, Dict, Any, Optional, Tuple
 from backend.models.schemas import (
     FactAtom,

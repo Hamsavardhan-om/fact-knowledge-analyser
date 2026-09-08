@@ -144,3 +144,31 @@ def test_genuine_contradiction_identical_context(reconciler):
     verdict = reconciler.reconcile_pair("Forex Reserves Conflict", f1, f2)
     assert verdict.verdict_type == VerdictType.GENUINE_CONTRADICTION
     assert verdict.divergence_dimension == DivergenceDimension.NONE
+
+
+def test_reconcile_all_clusters(reconciler):
+    f1 = FactAtom(
+        id="f1",
+        document_id="doc_a.pdf",
+        page_number=1,
+        entity="Delhivery",
+        attribute="Volume",
+        value_raw="500M",
+        value_numeric=500.0,
+        quote="Volume was 500M"
+    )
+    f2 = FactAtom(
+        id="f2",
+        document_id="doc_b.pdf",
+        page_number=2,
+        entity="Delhivery",
+        attribute="Volume",
+        value_raw="500M",
+        value_numeric=500.0,
+        quote="Delivered 500M"
+    )
+    clusters = {"Delhivery: Volume": [f1, f2]}
+    verdicts = reconciler.reconcile_all_clusters(clusters)
+    assert len(verdicts) == 1
+    assert verdicts[0].verdict_type == VerdictType.CORROBORATED
+
