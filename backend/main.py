@@ -74,6 +74,23 @@ def get_facts(
     return facts
 
 
+@app.get("/api/documents")
+def get_documents_with_facts():
+    """Returns all ingested documents along with their extracted facts."""
+    docs = []
+    for doc_id, doc in store.documents.items():
+        doc_facts = [f for f in store.facts.values() if f.document_id == doc_id]
+        docs.append({
+            "document_id": doc.document_id,
+            "total_pages": doc.total_pages,
+            "extracted_facts_count": len(doc_facts),
+            "file_size_bytes": doc.file_size_bytes,
+            "upload_timestamp": doc.upload_timestamp,
+            "facts": [f.model_dump() for f in doc_facts]
+        })
+    return docs
+
+
 @app.get("/api/verdicts", response_model=List[ReconciliationVerdict])
 def get_verdicts(verdict_type: Optional[VerdictType] = None):
     """Get reconciliation verdicts, optionally filtered by the 4 challenge case types."""

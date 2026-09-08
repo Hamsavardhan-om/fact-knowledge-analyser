@@ -3,13 +3,18 @@
  */
 
 let currentState = null;
+let currentDocuments = [];
+let currentView = 'reconcile'; // 'reconcile' | 'documents' | 'facts'
 let currentFilter = 'ALL';
 let searchQuery = '';
+let factsSearchQuery = '';
 let selectedFile = null;
+let expandedDocIds = new Set();
 
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   fetchState();
+  fetchDocuments();
 });
 
 async function fetchState() {
@@ -18,6 +23,8 @@ async function fetchState() {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     currentState = await res.json();
     renderDashboard();
+    renderFactsView();
+    updateNavCounts();
   } catch (err) {
     console.error('Failed to fetch state:', err);
     document.getElementById('verdictsList').innerHTML = `
@@ -26,6 +33,48 @@ async function fetchState() {
         <p style="color: #94A3B8; font-size: 0.85rem;">Could not connect to EFKL backend. Ensure FastAPI server is running.</p>
       </div>
     `;
+  }
+}
+
+async function fetchDocuments() {
+  try {
+    const res = await fetch('/api/documents');
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    currentDocuments = await res.json();
+    renderDocumentsView();
+    updateNavCounts();
+  } catch (err) {
+    console.error('Failed to fetch documents:', err);
+  }
+}
+
+function updateNavCounts() {
+  const docCount = currentDocuments.length || (currentState ? currentState.documents.length : 0);
+  const factCount = currentState ? currentState.total_facts : 0;
+  
+  const navDoc = document.getElementById('navDocCount');
+  const navFact = document.getElementById('navFactCount');
+  if (navDoc) navDoc.textContent = docCount;
+  if (navFact) navFact.textContent = factCount;
+}
+
+function switchView(viewName) {
+  currentView = viewName;
+
+  document.getElementById('tabReconcile').classList.toggle('active', viewName === 'reconcile');
+  document.getElementById('tabDocuments').classList.toggle('active', viewName === 'documents');
+  document.getElementById('tabFacts').classList.toggle('active', viewName === 'facts');
+
+  document.getElementById('viewReconcile').classList.toggle('hidden', viewName !== 'reconcile');
+  document.getElementById('viewDocuments').classList.toggle('hidden', viewName !== 'documents');
+  document.getElementById('viewFacts').classList.toggle('hidden', viewName !== 'facts');
+
+  if (viewName === 'documents') {
+    fetchDocuments();
+  } else if (viewName === 'facts') {
+    renderFactsView();
+  } else {
+    renderDashboard();
   }
 }
 
@@ -124,6 +173,179 @@ function renderVerdictCard(v) {
   `;
 }
 
+/* Render Ingested Documents Page */
+function renderDocumentsView() {
+  const container = document.getElementById('documentsList');
+  if (!container) return;
+
+  if (currentDocuments.length === 0) {
+    container.innerHTML = `
+      <div class="doc-card" style="text-align: center; padding: 3rem;">
+        <p style="color: #94A3B8;">No documents ingested yet. Upload a PDF to begin knowledge extraction.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = currentDocuments.map(doc => {
+    const isExpanded = expandedDocIds.has(doc.document_id);
+    const sizeKb = (doc.file_size_bytes / 1024).toFixed(1);
+    const dateFormatted = new Date(doc.upload_timestamp).toLocaleString([], {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+
+    let factsListHtml = '';
+    if (isExpanded) {
+      if (!doc.facts || doc.facts.length === 0) {
+        factsListHtml = `
+          <div class="doc-facts-box">
+            <p style="color: #94A3B8; font-size: 0.82rem;">No facts extracted or verified for this document yet.</p>
+          </div>
+        `;
+      } else {
+        const items = doc.facts.map(f => `
+          <div class="fact-item-card">
+            <div class="fact-item-header">
+              <span class="fact-item-title">${f.entity} &bull; ${f.attribute}</span>
+              <span class="page-badge">Page ${f.page_number}</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.4rem; align-items: center;">
+              <span class="fact-item-val">${f.value_raw}</span>
+              ${f.temporal_anchor ? `<span class="tag">⏱️ ${f.temporal_anchor}</span>` : ''}
+              ${f.scope ? `<span class="tag">🔍 ${f.scope}</span>` : ''}
+            </div>
+            <div class="evidence-quote">
+              "${f.quote}"
+            </div>
+            <button class="btn-audit" style="margin-top: 0.4rem;" onclick="auditFact('${f.id}')">
+              🔬 Audit Quote Provenance
+            </button>
+          </div>
+        `).join('');
+
+        factsListHtml = `
+          <div class="doc-facts-box">
+            <h4>
+              <span>Extracted Epistemic Fact Atoms (${doc.facts.length})</span>
+              <span style="font-size: 0.72rem; color: #94A3B8; text-transform: none;">Click any fact to audit provenance</span>
+            </h4>
+            ${items}
+          </div>
+        `;
+      }
+    }
+
+    return `
+      <div class="doc-card" id="doc-${doc.document_id}">
+        <div class="doc-card-header">
+          <div class="doc-card-title-group">
+            <div class="doc-file-icon">📄</div>
+            <div>
+              <h3 class="doc-card-title">${doc.document_id}</h3>
+              <div class="doc-card-sub">
+                <span>📅 Ingested: ${dateFormatted}</span>
+                <span>📦 Size: ${sizeKb} KB</span>
+              </div>
+            </div>
+          </div>
+          <div class="doc-meta-pills">
+            <span class="meta-pill">📄 ${doc.total_pages} Pages</span>
+            <span class="meta-pill meta-pill-highlight">⚡ ${doc.extracted_facts_count} Facts</span>
+            <span class="meta-pill">✓ Grounded</span>
+          </div>
+        </div>
+        <div class="doc-actions">
+          <button class="btn btn-sm btn-outline" onclick="toggleDocFacts('${doc.document_id}')">
+            ${isExpanded ? '▲ Hide Extracted Facts' : `▼ Inspect Extracted Facts (${doc.extracted_facts_count})`}
+          </button>
+        </div>
+        ${factsListHtml}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleDocFacts(docId) {
+  if (expandedDocIds.has(docId)) {
+    expandedDocIds.delete(docId);
+  } else {
+    expandedDocIds.add(docId);
+  }
+  renderDocumentsView();
+}
+
+/* Render All Facts Registry View */
+function renderFactsView() {
+  const container = document.getElementById('factsTableContainer');
+  if (!container || !currentState) return;
+
+  let facts = currentState.all_facts || [];
+  if (factsSearchQuery.trim()) {
+    const q = factsSearchQuery.toLowerCase();
+    facts = facts.filter(f => 
+      f.entity.toLowerCase().includes(q) ||
+      f.attribute.toLowerCase().includes(q) ||
+      f.value_raw.toLowerCase().includes(q) ||
+      f.quote.toLowerCase().includes(q) ||
+      f.document_id.toLowerCase().includes(q)
+    );
+  }
+
+  if (facts.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 3rem;">
+        <p style="color: #94A3B8;">No facts found matching search query.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const rows = facts.map(f => `
+    <tr>
+      <td style="font-family: var(--font-mono); font-size: 0.78rem; color: #38BDF8;">${f.id}</td>
+      <td style="font-weight: 600;">${f.entity}</td>
+      <td>${f.attribute}</td>
+      <td style="font-family: var(--font-mono); font-weight: 700; color: #38BDF8;">${f.value_raw}</td>
+      <td><span class="tag">${f.temporal_anchor || '—'}</span></td>
+      <td><span class="tag">${f.scope || '—'}</span></td>
+      <td style="max-width: 280px; font-size: 0.8rem; font-style: italic; color: #94A3B8;">"${f.quote}"</td>
+      <td>
+        <span class="page-badge">P${f.page_number}</span>
+        <div style="font-size: 0.72rem; color: #64748B; margin-top: 2px;">${f.document_id}</div>
+      </td>
+      <td>
+        <button class="btn-audit" onclick="auditFact('${f.id}')">Audit</button>
+      </td>
+    </tr>
+  `).join('');
+
+  container.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Fact ID</th>
+          <th>Entity</th>
+          <th>Attribute</th>
+          <th>Value</th>
+          <th>Temporal</th>
+          <th>Scope</th>
+          <th>Evidence Quote</th>
+          <th>Document</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+}
+
+function handleFactsSearch() {
+  factsSearchQuery = document.getElementById('factsSearchInput').value;
+  renderFactsView();
+}
+
 function setFilter(filterType) {
   currentFilter = filterType;
   document.querySelectorAll('.filter-pills .pill').forEach(btn => {
@@ -151,8 +373,10 @@ async function loadBenchmark(datasetName) {
     const data = await res.json();
     currentState = data.state;
     renderDashboard();
+    fetchDocuments();
+    showToast(`Loaded ${datasetName} benchmark!`);
   } catch (err) {
-    alert(`Error loading benchmark: ${err.message}`);
+    showToast(`Error: ${err.message}`);
   }
 }
 
@@ -263,13 +487,36 @@ async function submitUpload() {
     }
 
     const result = await res.json();
-    alert(`Successfully ingested ${selectedFile.name}!\nPages: ${result.pages_processed}\nFacts: ${result.facts_extracted}\nTotal Reconciled Verdicts: ${result.total_verdicts}`);
     closeUploadModal();
-    fetchState();
+    
+    // Automatically expand the newly uploaded document
+    expandedDocIds.add(selectedFile.name);
+
+    // Refresh state and documents list
+    await fetchState();
+    await fetchDocuments();
+
+    // Switch to dedicated Ingested Documents page!
+    switchView('documents');
+
+    showToast(`Successfully ingested "${selectedFile.name}"! (${result.pages_processed} pages, ${result.facts_extracted} facts)`);
   } catch (err) {
-    alert(`Upload failed: ${err.message}`);
+    showToast(`Upload failed: ${err.message}`);
   } finally {
     btn.disabled = false;
     document.getElementById('uploadProgress').classList.add('hidden');
   }
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toastNotification');
+  const msgEl = document.getElementById('toastMessage');
+  if (!toast || !msgEl) return;
+
+  msgEl.textContent = message;
+  toast.classList.remove('hidden');
+
+  setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 4500);
 }

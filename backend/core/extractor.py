@@ -128,34 +128,61 @@ RULES:
         lines = text.split("\n")
         doc_stem = Path(page.doc_id).stem[:12]
 
-        # Financial / operational patterns
+        # Dynamically infer entity from page content or filename
+        page_head = (page.text[:300] + " " + page.doc_id).lower()
+        if "cognizant" in page_head:
+            doc_entity = "Cognizant"
+        elif "delhivery" in page_head:
+            doc_entity = "Delhivery Limited"
+        elif "rbi" in page_head or "reserve bank" in page_head:
+            doc_entity = "Reserve Bank of India"
+        elif "imf" in page_head:
+            doc_entity = "International Monetary Fund"
+        elif "economic survey" in page_head:
+            doc_entity = "Government of India"
+        else:
+            doc_entity = Path(page.doc_id).stem.replace("-", " ").replace("_", " ").title()[:25]
+
+        # Generalized semantic & quantitative patterns across domains
         patterns = [
+            # Job Description: Roles & Titles
+            (r"(?:Job\s*title|Role|Designation)\s*:\s*([A-Za-z0-9\s\/\-\&]+)",
+             doc_entity, "Offered Job Role", "role"),
+            # Job Description: Compensation / CTC
+            (r"(?:Compensation|CTC|Stipend|Salary)\s*:\s*([A-Za-z0-9\s\.\,\/\u20b9\$]+(?:LPA|lpa|per\s+annum|per\s+month|pm)?)",
+             doc_entity, "Compensation Package", "ctc"),
+            # Academic Eligibility / Graduation Batch
+            (r"(?:graduating\s+in|batch\s+of|class\s+of|Hiring\s+Year)\s*([0-9]{4})",
+             doc_entity, "Target Graduation Batch", "year"),
+            # Academic Percentage / Cutoff
+            (r"(?:minimum|aggregate\s+of|with)?\s*([0-9]{1,2}(?:\.[0-9]+)?)\s*%\s*(?:in\s+[A-Za-z0-9\s\,\.]+)?",
+             doc_entity, "Academic Cutoff Requirement", "%"),
             # Volume & Shipments
             (r"(?:express\s+parcel(?:\s+services)?(?:\s+volume)?|shipments|orders)(?:[^\n\.\,\:]{0,50})?(?:was|reached|stood\s+at|delivered)?\s*([0-9]+(?:\.[0-9]+)?)\s*(million|billion|orders|shipments|bn|mn)",
-             "Delhivery Limited", "Express Parcel Shipment Volume"),
-            # Revenue
+             doc_entity, "Express Parcel Shipment Volume", "volume"),
+            # Revenue & Financial Figures
             (r"(?:revenue\s+from\s+operations|total\s+income|revenue)(?:[^\n\.\,\:]{0,50})?(?:was|reached|stood\s+at|of)?\s*(?:(?:Rs\.?|INR|\u20b9)\s*)?([0-9]+(?:[,\.][0-9]+)?)\s*(crores?|cr|million|billion)",
-             "Delhivery Limited", "Revenue from Operations"),
-            # Pin codes
+             doc_entity, "Revenue from Operations", "currency"),
+            # Pin codes & Reach
             (r"(?:serviced|presence\s+across|covered|network\s+of)\s*([0-9]{2,3}(?:,[0-9]{3})?)\s*(?:pin\s*codes|pincodes)",
-             "Delhivery Limited", "PIN Codes Covered"),
+             doc_entity, "PIN Codes Covered", "count"),
             # Macro Real GDP
             (r"(?:real\s+gdp|gdp\s+at\s+market\s+prices|economic\s+growth)(?:[^\n\.\,\:]{0,40})?(?:grew\s+by|expanded\s+by|projected\s+at|of|growth\s+of)?\s*([0-9]+\.[0-9]+)\s*(\%|per\s*cent)",
-             "Indian Economy", "Real GDP Growth Rate"),
+             "Indian Economy", "Real GDP Growth Rate", "%"),
             # Inflation
             (r"(?:headline\s+inflation|retail\s+headline\s+inflation|cpi\s+inflation|consumer\s+prices)(?:[^\n\.\,\:]{0,40})?(?:was|stood\s+at|averaged|declined\s+to)?\s*([0-9]+\.[0-9]+)\s*(\%|per\s*cent)",
-             "Indian Economy", "Headline CPI Inflation"),
+             "Indian Economy", "Headline CPI Inflation", "%"),
             # Forex reserves
             (r"(?:foreign\s+exchange\s+reserves|forex\s+reserves)(?:[^\n\.\,\:]{0,40})?(?:stood\s+at|reached|amounted\s+to)?\s*(?:USD|\$)\s*([0-9]+(?:\.[0-9]+)?)\s*(billion|bn)",
-             "Reserve Bank of India", "Foreign Exchange Reserves"),
+             "Reserve Bank of India", "Foreign Exchange Reserves", "currency"),
             # Current Account Deficit
             (r"(?:current\s+account\s+deficit|cad)(?:[^\n\.\,\:]{0,40})?(?:moderated\s+to|stood\s+at|declined\s+to)?\s*([0-9]+\.[0-9]+)\s*(\%|per\s*cent)\s+of\s+gdp",
-             "Indian Economy", "Current Account Deficit (% of GDP)")
+             "Indian Economy", "Current Account Deficit (% of GDP)", "%")
         ]
 
         # Extract temporal cues
         def detect_temporal_anchor(context: str) -> Optional[str]:
-            m = re.search(r"\b(FY\s*2[0-9]|FY\s*20[0-9]{2}(?:-[0-9]{2,4})?|20[0-9]{2}-[0-9]{2}|Q[1-4]\s*FY\s*2[0-9]|Fiscal\s*20[0-9]{2}|202[0-9]\/[0-9]{2})\b", context, re.IGNORECASE)
+            m = re.search(r"\b(FY\s*2[0-9]|FY\s*20[0-9]{2}(?:-[0-9]{2,4})?|20[0-9]{2}-[0-9]{2}|Q[1-4]\s*FY\s*2[0-9]|Fiscal\s*20[0-9]{2}|202[0-9]\/[0-9]{2}|Batch\s*202[0-9]|202[0-9])\b", context, re.IGNORECASE)
             if m:
                 return m.group(1).upper()
             return None
@@ -169,15 +196,16 @@ RULES:
             elif "headline" in context.lower():
                 return "Headline"
             elif "core" in context.lower():
-                return "Core (Excluding Food & Fuel)"
+                return "Core"
+            elif "fresher" in context.lower() or "entry level" in context.lower():
+                return "Fresher / Campus"
             elif "market prices" in context.lower():
                 return "At Market Prices"
-            elif "basic prices" in context.lower():
-                return "At Basic Prices"
             return None
 
         counter = 1
-        for regex, default_entity, default_attr in patterns:
+        for pattern_tuple in patterns:
+            regex, default_entity, default_attr, unit_hint = pattern_tuple
             for m in re.finditer(regex, text, re.IGNORECASE):
                 val_raw = m.group(0).strip()
                 val_num_str = m.group(1).replace(",", "")

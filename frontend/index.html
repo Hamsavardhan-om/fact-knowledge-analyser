@@ -33,44 +33,59 @@
       </div>
     </header>
 
+    <!-- Sub Navigation Tabs -->
+    <nav class="sub-nav">
+      <div class="nav-tabs">
+        <button class="nav-tab active" id="tabReconcile" onclick="switchView('reconcile')">
+          <span class="tab-icon">⚖️</span> Cross-Document Reconciliation
+        </button>
+        <button class="nav-tab" id="tabDocuments" onclick="switchView('documents')">
+          <span class="tab-icon">📄</span> Ingested Documents <span class="badge-count" id="navDocCount">0</span>
+        </button>
+        <button class="nav-tab" id="tabFacts" onclick="switchView('facts')">
+          <span class="tab-icon">⚡</span> Fact Registry <span class="badge-count" id="navFactCount">0</span>
+        </button>
+      </div>
+    </nav>
+
     <!-- Stats Banner -->
     <section class="metrics-grid">
-      <div class="metric-card">
+      <div class="metric-card" onclick="switchView('documents')">
         <div class="metric-icon docs-icon">📄</div>
         <div class="metric-content">
           <span class="metric-label">Ingested Documents</span>
           <span class="metric-val" id="statDocs">0</span>
         </div>
       </div>
-      <div class="metric-card">
+      <div class="metric-card" onclick="switchView('facts')">
         <div class="metric-icon facts-icon">⚡</div>
         <div class="metric-content">
           <span class="metric-label">Grounded Fact Atoms</span>
           <span class="metric-val" id="statFacts">0</span>
         </div>
       </div>
-      <div class="metric-card metric-corroborated" onclick="setFilter('CORROBORATED')">
+      <div class="metric-card metric-corroborated" onclick="switchView('reconcile'); setFilter('CORROBORATED')">
         <div class="metric-icon">✓</div>
         <div class="metric-content">
           <span class="metric-label">Case 1: Corroborated</span>
           <span class="metric-val" id="statCorroborated">0</span>
         </div>
       </div>
-      <div class="metric-card metric-contradiction" onclick="setFilter('GENUINE_CONTRADICTION')">
+      <div class="metric-card metric-contradiction" onclick="switchView('reconcile'); setFilter('GENUINE_CONTRADICTION')">
         <div class="metric-icon">✗</div>
         <div class="metric-content">
           <span class="metric-label">Case 2: Contradictions</span>
           <span class="metric-val" id="statContradictions">0</span>
         </div>
       </div>
-      <div class="metric-card metric-apparent" onclick="setFilter('APPARENT_CONTRADICTION')">
+      <div class="metric-card metric-apparent" onclick="switchView('reconcile'); setFilter('APPARENT_CONTRADICTION')">
         <div class="metric-icon">⚖️</div>
         <div class="metric-content">
           <span class="metric-label">Case 3: Context Reconciled</span>
           <span class="metric-val" id="statApparent">0</span>
         </div>
       </div>
-      <div class="metric-card metric-failure" onclick="setFilter('EXTRACTION_FAILURE')">
+      <div class="metric-card metric-failure" onclick="switchView('reconcile'); setFilter('EXTRACTION_FAILURE')">
         <div class="metric-icon">🔍</div>
         <div class="metric-content">
           <span class="metric-label">Case 4: Audited Failures</span>
@@ -79,8 +94,8 @@
       </div>
     </section>
 
-    <!-- Main Content Tabs -->
-    <main class="main-container">
+    <!-- VIEW 1: Reconciliation Explorer -->
+    <main id="viewReconcile" class="main-container">
       <div class="view-header">
         <div class="filter-pills">
           <button class="pill active" data-filter="ALL" onclick="setFilter('ALL')">All Cases</button>
@@ -105,6 +120,41 @@
       <!-- Verdicts Stream -->
       <section id="verdictsList" class="verdicts-stream">
         <div class="loading-state">Loading knowledge layer...</div>
+      </section>
+    </main>
+
+    <!-- VIEW 2: Ingested Documents Page (Dedicated Separate Page) -->
+    <main id="viewDocuments" class="main-container hidden">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Document Intelligence & Ingestion Registry</h2>
+          <p class="view-desc">Inspect all ingested PDF documents, bounding layouts, structural page counts, and extracted epistemic facts.</p>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="openUploadModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Ingest Another PDF
+        </button>
+      </div>
+
+      <section id="documentsList" class="documents-grid">
+        <!-- Rendered dynamically -->
+      </section>
+    </main>
+
+    <!-- VIEW 3: All Grounded Facts Page -->
+    <main id="viewFacts" class="main-container hidden">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Grounded Fact Atoms Registry</h2>
+          <p class="view-desc">Every discrete claim mined across all documents, anchored to exact page numbers and quotes.</p>
+        </div>
+        <div class="search-box">
+          <input type="text" id="factsSearchInput" placeholder="Filter facts by entity, metric, or quote..." oninput="handleFactsSearch()" />
+        </div>
+      </div>
+
+      <section id="factsTableContainer" class="facts-table-card">
+        <!-- Rendered dynamically -->
       </section>
     </main>
 
@@ -144,6 +194,12 @@
       <div class="drawer-body" id="auditDrawerContent">
         <!-- Dynamic audit inspection -->
       </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast hidden">
+      <div class="toast-icon">✨</div>
+      <div class="toast-message" id="toastMessage">Ingestion completed successfully!</div>
     </div>
   </div>
 
