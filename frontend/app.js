@@ -4,7 +4,7 @@
 
 let currentState = null;
 let currentDocuments = [];
-let currentView = 'reconcile'; // 'reconcile' | 'documents' | 'facts'
+let currentView = 'landing'; // 'landing' | 'reconcile' | 'documents' | 'facts'
 let currentFilter = 'ALL';
 let searchQuery = '';
 let factsSearchQuery = '';
@@ -27,12 +27,15 @@ async function fetchState() {
     updateNavCounts();
   } catch (err) {
     console.error('Failed to fetch state:', err);
-    document.getElementById('verdictsList').innerHTML = `
-      <div class="verdict-card" style="border-color: #EF4444;">
-        <h4 style="color: #EF4444; margin-bottom: 0.5rem;">Connection Error</h4>
-        <p style="color: #94A3B8; font-size: 0.85rem;">Could not connect to EFKL backend. Ensure FastAPI server is running.</p>
-      </div>
-    `;
+    const container = document.getElementById('verdictsList');
+    if (container) {
+      container.innerHTML = `
+        <div class="verdict-card" style="border-color: #EF4444;">
+          <h4 style="color: #EF4444; margin-bottom: 0.5rem;">Connection Error</h4>
+          <p style="color: #64748B; font-size: 0.85rem;">Could not connect to EFKL backend. Ensure FastAPI server is running.</p>
+        </div>
+      `;
+    }
   }
 }
 
@@ -61,19 +64,41 @@ function updateNavCounts() {
 function switchView(viewName) {
   currentView = viewName;
 
-  document.getElementById('tabReconcile').classList.toggle('active', viewName === 'reconcile');
-  document.getElementById('tabDocuments').classList.toggle('active', viewName === 'documents');
-  document.getElementById('tabFacts').classList.toggle('active', viewName === 'facts');
+  // Update navbar links
+  const navLanding = document.getElementById('navLanding');
+  const navReconcile = document.getElementById('navReconcile');
+  const navDocuments = document.getElementById('navDocuments');
+  const navFacts = document.getElementById('navFacts');
 
-  document.getElementById('viewReconcile').classList.toggle('hidden', viewName !== 'reconcile');
-  document.getElementById('viewDocuments').classList.toggle('hidden', viewName !== 'documents');
-  document.getElementById('viewFacts').classList.toggle('hidden', viewName !== 'facts');
+  if (navLanding) navLanding.classList.toggle('active', viewName === 'landing');
+  if (navReconcile) navReconcile.classList.toggle('active', viewName === 'reconcile');
+  if (navDocuments) navDocuments.classList.toggle('active', viewName === 'documents');
+  if (navFacts) navFacts.classList.toggle('active', viewName === 'facts');
+
+  // Toggle view sections
+  const viewLanding = document.getElementById('viewLanding');
+  const viewReconcile = document.getElementById('viewReconcile');
+  const viewDocuments = document.getElementById('viewDocuments');
+  const viewFacts = document.getElementById('viewFacts');
+  const metricsSection = document.getElementById('metricsSection');
+
+  if (viewLanding) viewLanding.classList.toggle('hidden', viewName !== 'landing');
+  if (viewReconcile) viewReconcile.classList.toggle('hidden', viewName !== 'reconcile');
+  if (viewDocuments) viewDocuments.classList.toggle('hidden', viewName !== 'documents');
+  if (viewFacts) viewFacts.classList.toggle('hidden', viewName !== 'facts');
+
+  // Metrics banner is hidden on landing page, shown on explorer views
+  if (metricsSection) {
+    metricsSection.classList.toggle('hidden', viewName === 'landing');
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (viewName === 'documents') {
     fetchDocuments();
   } else if (viewName === 'facts') {
     renderFactsView();
-  } else {
+  } else if (viewName === 'reconcile') {
     renderDashboard();
   }
 }
