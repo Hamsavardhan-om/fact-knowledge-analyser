@@ -1,0 +1,432 @@
+{
+  "dataset_name": "india-macroeconomy",
+  "facts": [
+    {
+      "id": "macro_fact_01",
+      "document_id": "02-rbi-annual-report-2024-25-excerpt.pdf",
+      "page_number": 91,
+      "entity": "Indian Economy",
+      "attribute": "Real GDP Growth Rate",
+      "value_raw": "9.2%",
+      "value_numeric": 9.2,
+      "unit": "%",
+      "temporal_anchor": "2023-24 (FY24)",
+      "scope": "Market Prices",
+      "quote": "Real GDP at Market Prices (% change)* 2023-24: 9.2",
+      "context_window": "Macroeconomic Appendix Table I.1: Real Economy on Page 91",
+      "confidence": 0.99,
+      "extraction_flags": []
+    },
+    {
+      "id": "macro_fact_02",
+      "document_id": "03-imf-india-2025-article-iv-excerpt.pdf",
+      "page_number": 44,
+      "entity": "Indian Economy",
+      "attribute": "Real GDP Growth Rate",
+      "value_raw": "9.2%",
+      "value_numeric": 9.2,
+      "unit": "%",
+      "temporal_anchor": "2023/24 (FY24)",
+      "scope": "Market Prices",
+      "quote": "Real GDP (at market prices) 2023/24: 9.2",
+      "context_window": "Table 1: Selected Economic Indicators on Page 44",
+      "confidence": 0.99,
+      "extraction_flags": []
+    },
+    {
+      "id": "macro_fact_03",
+      "document_id": "02-rbi-annual-report-2024-25-excerpt.pdf",
+      "page_number": 91,
+      "entity": "Indian Economy",
+      "attribute": "Real GDP Growth Rate",
+      "value_raw": "6.5%",
+      "value_numeric": 6.5,
+      "unit": "%",
+      "temporal_anchor": "2024-25 (FY25)",
+      "scope": "Market Prices",
+      "quote": "Real GDP at Market Prices (% change)* 2024-25: 6.5",
+      "context_window": "Macroeconomic Appendix Table I.1: Real Economy on Page 91",
+      "confidence": 0.99,
+      "extraction_flags": []
+    },
+    {
+      "id": "macro_fact_04",
+      "document_id": "03-imf-india-2025-article-iv-excerpt.pdf",
+      "page_number": 44,
+      "entity": "Indian Economy",
+      "attribute": "Real GDP Growth Rate",
+      "value_raw": "6.5%",
+      "value_numeric": 6.5,
+      "unit": "%",
+      "temporal_anchor": "2024/25 (FY25)",
+      "scope": "Market Prices Est.",
+      "quote": "Real GDP (at market prices) 2024/25 Est.: 6.5",
+      "context_window": "Table 1: Selected Economic Indicators on Page 44",
+      "confidence": 0.99,
+      "extraction_flags": []
+    },
+    {
+      "id": "macro_fact_05",
+      "document_id": "01-india-economic-survey-2024-25-excerpt.pdf",
+      "page_number": 37,
+      "entity": "Reserve Bank of India",
+      "attribute": "Foreign Exchange Reserves",
+      "value_raw": "USD 640.3 billion",
+      "value_numeric": 640.3,
+      "unit": "USD billion",
+      "temporal_anchor": "End-March 2024",
+      "scope": "Total Reserves",
+      "quote": "Indias foreign exchange reserves stood at USD 640.3 billion as of the end of March 2024",
+      "context_window": "External Sector Overview, Paragraph 1.58 on Page 37",
+      "confidence": 0.98,
+      "extraction_flags": []
+    },
+    {
+      "id": "macro_fact_06",
+      "document_id": "02-rbi-annual-report-2024-25-excerpt.pdf",
+      "page_number": 90,
+      "entity": "Reserve Bank of India",
+      "attribute": "Foreign Exchange Reserves",
+      "value_raw": "USD 651.5 billion",
+      "value_numeric": 651.5,
+      "unit": "USD billion",
+      "temporal_anchor": "End-March 2024",
+      "scope": "Total Reserves including valuation adjustments",
+      "quote": "Foreign exchange reserves stood at USD 651.5 billion as at end-March 2024",
+      "context_window": "Economic Review - External Sector on Page 90",
+      "confidence": 0.98,
+      "extraction_flags": []
+    },
+    {
+      "id": "macro_fact_07",
+      "document_id": "01-india-economic-survey-2024-25-excerpt.pdf",
+      "page_number": 28,
+      "entity": "Indian Economy",
+      "attribute": "Consumer Price Inflation",
+      "value_raw": "5.4%",
+      "value_numeric": 5.4,
+      "unit": "%",
+      "temporal_anchor": "FY24",
+      "scope": "Headline CPI",
+      "quote": "Retail headline inflation, as measured by the change in the Consumer Price Index averaged 5.4 per cent in FY24",
+      "context_window": "Prices and Inflation Section on Page 28",
+      "confidence": 0.98,
+      "extraction_flags": []
+    },
+    {
+      "id": "macro_fact_08",
+      "document_id": "01-india-economic-survey-2024-25-excerpt.pdf",
+      "page_number": 79,
+      "entity": "Indian Economy",
+      "attribute": "Consumer Price Inflation",
+      "value_raw": "3.4%",
+      "value_numeric": 3.4,
+      "unit": "%",
+      "temporal_anchor": "FY24",
+      "scope": "Core CPI (Excluding Food & Fuel)",
+      "quote": "Core inflation declined significantly to 3.4 per cent in FY24",
+      "context_window": "Chart IV.4 Analysis on Page 79",
+      "confidence": 0.98,
+      "extraction_flags": []
+    },
+    {
+      "id": "macro_fact_09",
+      "document_id": "03-imf-india-2025-article-iv-excerpt.pdf",
+      "page_number": 18,
+      "entity": "Government of India",
+      "attribute": "Fiscal Deficit (% of GDP)",
+      "value_raw": "8.2% of GDP",
+      "value_numeric": 8.2,
+      "unit": "% of GDP",
+      "temporal_anchor": "FY24",
+      "scope": "General Government (Centre + States Consolidated)",
+      "quote": "General government fiscal deficit remained elevated at 8.2 percent of GDP in FY2023/24",
+      "context_window": "Fiscal Policy Review, Paragraph 12 on Page 18",
+      "confidence": 0.97,
+      "extraction_flags": []
+    },
+    {
+      "id": "macro_fact_10",
+      "document_id": "01-india-economic-survey-2024-25-excerpt.pdf",
+      "page_number": 24,
+      "entity": "Government of India",
+      "attribute": "Fiscal Deficit (% of GDP)",
+      "value_raw": "5.6% of GDP",
+      "value_numeric": 5.6,
+      "unit": "% of GDP",
+      "temporal_anchor": "FY24",
+      "scope": "Central Government",
+      "quote": "Central Government fiscal deficit for FY24 stood at 5.6 per cent of GDP",
+      "context_window": "Fiscal Developments and Budgetary Trends on Page 24",
+      "confidence": 0.98,
+      "extraction_flags": []
+    }
+  ],
+  "verdicts": [
+    {
+      "id": "macro_v_01",
+      "topic": "Indian Economy: Real GDP Growth Rate FY24",
+      "verdict_type": "CORROBORATED",
+      "fact_ids": [
+        "macro_fact_01",
+        "macro_fact_02"
+      ],
+      "facts": [
+        {
+          "id": "macro_fact_01",
+          "document_id": "02-rbi-annual-report-2024-25-excerpt.pdf",
+          "page_number": 91,
+          "entity": "Indian Economy",
+          "attribute": "Real GDP Growth Rate",
+          "value_raw": "9.2%",
+          "value_numeric": 9.2,
+          "unit": "%",
+          "temporal_anchor": "2023-24 (FY24)",
+          "scope": "Market Prices",
+          "quote": "Real GDP at Market Prices (% change)* 2023-24: 9.2",
+          "context_window": "Macroeconomic Appendix Table I.1: Real Economy on Page 91",
+          "confidence": 0.99,
+          "extraction_flags": []
+        },
+        {
+          "id": "macro_fact_02",
+          "document_id": "03-imf-india-2025-article-iv-excerpt.pdf",
+          "page_number": 44,
+          "entity": "Indian Economy",
+          "attribute": "Real GDP Growth Rate",
+          "value_raw": "9.2%",
+          "value_numeric": 9.2,
+          "unit": "%",
+          "temporal_anchor": "2023/24 (FY24)",
+          "scope": "Market Prices",
+          "quote": "Real GDP (at market prices) 2023/24: 9.2",
+          "context_window": "Table 1: Selected Economic Indicators on Page 44",
+          "confidence": 0.99,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Real GDP growth of 9.2% for FY24 is corroborated across RBI Annual Report and IMF Article IV.",
+      "explanation": "Both India's central bank (RBI) and the International Monetary Fund (IMF) confirm identical real GDP expansion of 9.2% at market prices for the fiscal year 2023-24.",
+      "divergence_dimension": "NONE",
+      "audit_notes": "Perfect alignment across national central bank data and multilateral institution surveillance."
+    },
+    {
+      "id": "macro_v_02",
+      "topic": "Indian Economy: Real GDP Growth Rate FY25",
+      "verdict_type": "CORROBORATED",
+      "fact_ids": [
+        "macro_fact_03",
+        "macro_fact_04"
+      ],
+      "facts": [
+        {
+          "id": "macro_fact_03",
+          "document_id": "02-rbi-annual-report-2024-25-excerpt.pdf",
+          "page_number": 91,
+          "entity": "Indian Economy",
+          "attribute": "Real GDP Growth Rate",
+          "value_raw": "6.5%",
+          "value_numeric": 6.5,
+          "unit": "%",
+          "temporal_anchor": "2024-25 (FY25)",
+          "scope": "Market Prices",
+          "quote": "Real GDP at Market Prices (% change)* 2024-25: 6.5",
+          "context_window": "Macroeconomic Appendix Table I.1: Real Economy on Page 91",
+          "confidence": 0.99,
+          "extraction_flags": []
+        },
+        {
+          "id": "macro_fact_04",
+          "document_id": "03-imf-india-2025-article-iv-excerpt.pdf",
+          "page_number": 44,
+          "entity": "Indian Economy",
+          "attribute": "Real GDP Growth Rate",
+          "value_raw": "6.5%",
+          "value_numeric": 6.5,
+          "unit": "%",
+          "temporal_anchor": "2024/25 (FY25)",
+          "scope": "Market Prices Est.",
+          "quote": "Real GDP (at market prices) 2024/25 Est.: 6.5",
+          "context_window": "Table 1: Selected Economic Indicators on Page 44",
+          "confidence": 0.99,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "FY25 Real GDP growth of 6.5% corroborated between RBI and IMF.",
+      "explanation": "Both the RBI Annual Report and IMF staff estimates project FY24/25 growth at 6.5%, corroborating the baseline growth trajectory.",
+      "divergence_dimension": "NONE",
+      "audit_notes": "Corroboration confirmed."
+    },
+    {
+      "id": "macro_v_03",
+      "topic": "Reserve Bank of India: Foreign Exchange Reserves (End-March 2024)",
+      "verdict_type": "GENUINE_CONTRADICTION",
+      "fact_ids": [
+        "macro_fact_05",
+        "macro_fact_06"
+      ],
+      "facts": [
+        {
+          "id": "macro_fact_05",
+          "document_id": "01-india-economic-survey-2024-25-excerpt.pdf",
+          "page_number": 37,
+          "entity": "Reserve Bank of India",
+          "attribute": "Foreign Exchange Reserves",
+          "value_raw": "USD 640.3 billion",
+          "value_numeric": 640.3,
+          "unit": "USD billion",
+          "temporal_anchor": "End-March 2024",
+          "scope": "Total Reserves",
+          "quote": "Indias foreign exchange reserves stood at USD 640.3 billion as of the end of March 2024",
+          "context_window": "External Sector Overview, Paragraph 1.58 on Page 37",
+          "confidence": 0.98,
+          "extraction_flags": []
+        },
+        {
+          "id": "macro_fact_06",
+          "document_id": "02-rbi-annual-report-2024-25-excerpt.pdf",
+          "page_number": 90,
+          "entity": "Reserve Bank of India",
+          "attribute": "Foreign Exchange Reserves",
+          "value_raw": "USD 651.5 billion",
+          "value_numeric": 651.5,
+          "unit": "USD billion",
+          "temporal_anchor": "End-March 2024",
+          "scope": "Total Reserves including valuation adjustments",
+          "quote": "Foreign exchange reserves stood at USD 651.5 billion as at end-March 2024",
+          "context_window": "Economic Review - External Sector on Page 90",
+          "confidence": 0.98,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Genuine / likely contradiction in reported End-March 2024 Forex Reserves: USD 640.3B (Economic Survey) vs USD 651.5B (RBI).",
+      "explanation": "Both reports cite the exact same institution (RBI), metric (Foreign Exchange Reserves), and balance sheet cutoff date (End-March 2024), but diverge by $11.2 Billion. While this stems from differing cut-off publication dates (provisional weekly BoP reporting vs audited balance sheet valuation adjustments), it functions as a genuine cross-document conflict in published official figures.",
+      "divergence_dimension": "NONE",
+      "audit_notes": "Flagged as Genuine / Likely Contradiction. Requires inspecting the RBI balance sheet notes to confirm currency revaluation reserves."
+    },
+    {
+      "id": "macro_v_04",
+      "topic": "Indian Economy: Consumer Price Inflation FY24",
+      "verdict_type": "APPARENT_CONTRADICTION",
+      "fact_ids": [
+        "macro_fact_07",
+        "macro_fact_08"
+      ],
+      "facts": [
+        {
+          "id": "macro_fact_07",
+          "document_id": "01-india-economic-survey-2024-25-excerpt.pdf",
+          "page_number": 28,
+          "entity": "Indian Economy",
+          "attribute": "Consumer Price Inflation",
+          "value_raw": "5.4%",
+          "value_numeric": 5.4,
+          "unit": "%",
+          "temporal_anchor": "FY24",
+          "scope": "Headline CPI",
+          "quote": "Retail headline inflation, as measured by the change in the Consumer Price Index averaged 5.4 per cent in FY24",
+          "context_window": "Prices and Inflation Section on Page 28",
+          "confidence": 0.98,
+          "extraction_flags": []
+        },
+        {
+          "id": "macro_fact_08",
+          "document_id": "01-india-economic-survey-2024-25-excerpt.pdf",
+          "page_number": 79,
+          "entity": "Indian Economy",
+          "attribute": "Consumer Price Inflation",
+          "value_raw": "3.4%",
+          "value_numeric": 3.4,
+          "unit": "%",
+          "temporal_anchor": "FY24",
+          "scope": "Core CPI (Excluding Food & Fuel)",
+          "quote": "Core inflation declined significantly to 3.4 per cent in FY24",
+          "context_window": "Chart IV.4 Analysis on Page 79",
+          "confidence": 0.98,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Apparent contradiction in FY24 CPI inflation (5.4% vs 3.4%) resolved by Headline vs Core basket scope.",
+      "explanation": "The Economic Survey reports both 5.4% and 3.4% for FY24 inflation. The epistemic engine reconciles the apparent contradiction through scope: 5.4% is the Headline CPI (which includes volatile food and energy prices), whereas 3.4% is Core CPI (which filters out food and fuel).",
+      "divergence_dimension": "SCOPE",
+      "audit_notes": "Resolved via consumer price basket scope: Headline vs Core."
+    },
+    {
+      "id": "macro_v_05",
+      "topic": "Government of India: Fiscal Deficit (% of GDP) FY24",
+      "verdict_type": "APPARENT_CONTRADICTION",
+      "fact_ids": [
+        "macro_fact_09",
+        "macro_fact_10"
+      ],
+      "facts": [
+        {
+          "id": "macro_fact_09",
+          "document_id": "03-imf-india-2025-article-iv-excerpt.pdf",
+          "page_number": 18,
+          "entity": "Government of India",
+          "attribute": "Fiscal Deficit (% of GDP)",
+          "value_raw": "8.2% of GDP",
+          "value_numeric": 8.2,
+          "unit": "% of GDP",
+          "temporal_anchor": "FY24",
+          "scope": "General Government (Centre + States Consolidated)",
+          "quote": "General government fiscal deficit remained elevated at 8.2 percent of GDP in FY2023/24",
+          "context_window": "Fiscal Policy Review, Paragraph 12 on Page 18",
+          "confidence": 0.97,
+          "extraction_flags": []
+        },
+        {
+          "id": "macro_fact_10",
+          "document_id": "01-india-economic-survey-2024-25-excerpt.pdf",
+          "page_number": 24,
+          "entity": "Government of India",
+          "attribute": "Fiscal Deficit (% of GDP)",
+          "value_raw": "5.6% of GDP",
+          "value_numeric": 5.6,
+          "unit": "% of GDP",
+          "temporal_anchor": "FY24",
+          "scope": "Central Government",
+          "quote": "Central Government fiscal deficit for FY24 stood at 5.6 per cent of GDP",
+          "context_window": "Fiscal Developments and Budgetary Trends on Page 24",
+          "confidence": 0.98,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Apparent contradiction in FY24 fiscal deficit (8.2% vs 5.6%) resolved by General Government vs Central Government perimeter.",
+      "explanation": "IMF states the fiscal deficit is 8.2% of GDP, while the Economic Survey reports 5.6%. This stark difference is resolved by institutional perimeter: the Economic Survey measures the Central Government deficit alone, whereas the IMF reports the General Government deficit (consolidating Central Government + all 28 State Governments).",
+      "divergence_dimension": "SCOPE",
+      "audit_notes": "Resolved via fiscal scope: General Government vs Central Government."
+    },
+    {
+      "id": "macro_v_06",
+      "topic": "Indian Economy: GDP Deflator vs Real GDP Growth",
+      "verdict_type": "EXTRACTION_FAILURE",
+      "fact_ids": [
+        "macro_fact_04"
+      ],
+      "facts": [
+        {
+          "id": "macro_fact_04",
+          "document_id": "03-imf-india-2025-article-iv-excerpt.pdf",
+          "page_number": 44,
+          "entity": "Indian Economy",
+          "attribute": "Real GDP Growth Rate",
+          "value_raw": "6.5%",
+          "value_numeric": 6.5,
+          "unit": "%",
+          "temporal_anchor": "2024/25 (FY25)",
+          "scope": "Market Prices Est.",
+          "quote": "Real GDP (at market prices) 2024/25 Est.: 6.5",
+          "context_window": "Table 1: Selected Economic Indicators on Page 44",
+          "confidence": 0.99,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Extraction / reasoning failure: Macroeconomic table column slippage between Real GDP and GDP Deflator.",
+      "explanation": "On Page 64 of the IMF Article IV excerpt, a dense memorandum table places 'Real GDP growth (6.5%)' directly adjacent to 'Inflation (GDP deflator; 3.1%)'. A naive text regex or OCR column alignment matched the label 'Real GDP' with the adjacent deflator column value '3.1%', erroneously reporting that Indian GDP growth crashed to 3.1%.",
+      "divergence_dimension": "NONE",
+      "audit_notes": "Handled by KnowledgeAuditor: detects table row-column boundary slippage and cross-checks with primary text narratives on Page 3 and Page 44."
+    }
+  ]
+}

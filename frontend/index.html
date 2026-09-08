@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Epistemic Fact Knowledge Layer (EFKL)</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Header -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-badge">EFKL</div>
+        <div class="brand-text">
+          <h1>Fact Knowledge Layer</h1>
+          <span class="tagline">Epistemic Dialectic Engine & Cross-Document Provenance</span>
+        </div>
+      </div>
+      <div class="nav-controls">
+        <div class="dataset-switcher">
+          <span class="label">Benchmark:</span>
+          <button class="btn btn-sm btn-outline active" id="btnLoadDelhivery" onclick="loadBenchmark('delhivery')">Delhivery</button>
+          <button class="btn btn-sm btn-outline" id="btnLoadMacro" onclick="loadBenchmark('india-macroeconomy')">India Macroeconomy</button>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="openUploadModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Ingest New PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Banner -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon docs-icon">📄</div>
+        <div class="metric-content">
+          <span class="metric-label">Ingested Documents</span>
+          <span class="metric-val" id="statDocs">0</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon facts-icon">⚡</div>
+        <div class="metric-content">
+          <span class="metric-label">Grounded Fact Atoms</span>
+          <span class="metric-val" id="statFacts">0</span>
+        </div>
+      </div>
+      <div class="metric-card metric-corroborated" onclick="setFilter('CORROBORATED')">
+        <div class="metric-icon">✓</div>
+        <div class="metric-content">
+          <span class="metric-label">Case 1: Corroborated</span>
+          <span class="metric-val" id="statCorroborated">0</span>
+        </div>
+      </div>
+      <div class="metric-card metric-contradiction" onclick="setFilter('GENUINE_CONTRADICTION')">
+        <div class="metric-icon">✗</div>
+        <div class="metric-content">
+          <span class="metric-label">Case 2: Contradictions</span>
+          <span class="metric-val" id="statContradictions">0</span>
+        </div>
+      </div>
+      <div class="metric-card metric-apparent" onclick="setFilter('APPARENT_CONTRADICTION')">
+        <div class="metric-icon">⚖️</div>
+        <div class="metric-content">
+          <span class="metric-label">Case 3: Context Reconciled</span>
+          <span class="metric-val" id="statApparent">0</span>
+        </div>
+      </div>
+      <div class="metric-card metric-failure" onclick="setFilter('EXTRACTION_FAILURE')">
+        <div class="metric-icon">🔍</div>
+        <div class="metric-content">
+          <span class="metric-label">Case 4: Audited Failures</span>
+          <span class="metric-val" id="statFailures">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Tabs -->
+    <main class="main-container">
+      <div class="view-header">
+        <div class="filter-pills">
+          <button class="pill active" data-filter="ALL" onclick="setFilter('ALL')">All Cases</button>
+          <button class="pill pill-corr" data-filter="CORROBORATED" onclick="setFilter('CORROBORATED')">
+            Case 1: Corroborated
+          </button>
+          <button class="pill pill-gen" data-filter="GENUINE_CONTRADICTION" onclick="setFilter('GENUINE_CONTRADICTION')">
+            Case 2: Genuine Contradiction
+          </button>
+          <button class="pill pill-app" data-filter="APPARENT_CONTRADICTION" onclick="setFilter('APPARENT_CONTRADICTION')">
+            Case 3: Apparent Contradiction (Context Reconciled)
+          </button>
+          <button class="pill pill-fail" data-filter="EXTRACTION_FAILURE" onclick="setFilter('EXTRACTION_FAILURE')">
+            Case 4: Audited Failure & Reflection
+          </button>
+        </div>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search facts, entities, quotes..." oninput="handleSearch()" />
+        </div>
+      </div>
+
+      <!-- Verdicts Stream -->
+      <section id="verdictsList" class="verdicts-stream">
+        <div class="loading-state">Loading knowledge layer...</div>
+      </section>
+    </main>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Ingest Arbitrary PDF</h3>
+          <button class="btn-close" onclick="closeUploadModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="help-text">Upload any multi-page PDF. The Epistemic Perception & Extraction engine will parse layout, extract grounded fact atoms, and incrementally align discourse topics without hardcoded rules.</p>
+          <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept=".pdf" style="display:none" onchange="handleFileSelect(event)" />
+            <div class="drop-icon">📁</div>
+            <p><strong>Click to select</strong> or drag and drop PDF here</p>
+            <span id="selectedFileName" class="file-name-tag"></span>
+          </div>
+          <div id="uploadProgress" class="progress-bar-container hidden">
+            <div class="progress-bar" id="progressBar"></div>
+            <span class="progress-text" id="progressText">Ingesting & decomposing claims...</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeUploadModal()">Cancel</button>
+          <button class="btn btn-primary" id="btnUploadSubmit" onclick="submitUpload()" disabled>Run Ingestion</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Drawer -->
+    <div id="auditDrawer" class="drawer hidden">
+      <div class="drawer-header">
+        <h3>Adversarial Grounding Audit</h3>
+        <button class="btn-close" onclick="closeAuditDrawer()">&times;</button>
+      </div>
+      <div class="drawer-body" id="auditDrawerContent">
+        <!-- Dynamic audit inspection -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

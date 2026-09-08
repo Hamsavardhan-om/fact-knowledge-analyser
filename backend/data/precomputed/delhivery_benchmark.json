@@ -1,0 +1,436 @@
+{
+  "dataset_name": "delhivery",
+  "facts": [
+    {
+      "id": "delhivery_fact_01",
+      "document_id": "01-delhivery-prospectus-2022-excerpt.pdf",
+      "page_number": 28,
+      "entity": "Delhivery Limited",
+      "attribute": "Express Parcel Shipment Volume",
+      "value_raw": "577.06 million",
+      "value_numeric": 577.06,
+      "unit": "million shipments",
+      "temporal_anchor": "FY21",
+      "scope": "Consolidated Restated",
+      "quote": "Our Express Parcel Services volume was 577.06 million orders in Fiscal 2021",
+      "context_window": "Summary Financial and Operating Data table on Page 28",
+      "confidence": 0.99,
+      "extraction_flags": []
+    },
+    {
+      "id": "delhivery_fact_02",
+      "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+      "page_number": 12,
+      "entity": "Delhivery Limited",
+      "attribute": "Express Parcel Shipment Volume",
+      "value_raw": "577.06 million",
+      "value_numeric": 577.06,
+      "unit": "million shipments",
+      "temporal_anchor": "FY21",
+      "scope": "Consolidated",
+      "quote": "Express parcel volume delivered in FY21 stood at 577.06 million orders",
+      "context_window": "Historical 5-year operating track record table on Page 12",
+      "confidence": 0.99,
+      "extraction_flags": []
+    },
+    {
+      "id": "delhivery_fact_03",
+      "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+      "page_number": 4,
+      "entity": "Delhivery Limited",
+      "attribute": "Express Parcel Shipment Volume",
+      "value_raw": "740 million",
+      "value_numeric": 740.0,
+      "unit": "million shipments",
+      "temporal_anchor": "FY24",
+      "scope": "Consolidated",
+      "quote": "740 Mn Express parcel shipments delivered during the financial year ended March 31, 2024",
+      "context_window": "Corporate Overview & Operational Highlights on Page 4",
+      "confidence": 0.98,
+      "extraction_flags": []
+    },
+    {
+      "id": "delhivery_fact_04",
+      "document_id": "03-delhivery-q4-fy24-earnings-presentation.pdf",
+      "page_number": 4,
+      "entity": "Delhivery Limited",
+      "attribute": "Express Parcel Shipment Volume",
+      "value_raw": "740 million",
+      "value_numeric": 740.0,
+      "unit": "million shipments",
+      "temporal_anchor": "FY24",
+      "scope": "Consolidated",
+      "quote": "FY24 Express Parcel volume reached 740M shipments",
+      "context_window": "FY24 Full Year Operational Performance Summary on Page 4",
+      "confidence": 0.98,
+      "extraction_flags": []
+    },
+    {
+      "id": "delhivery_fact_05",
+      "document_id": "01-delhivery-prospectus-2022-excerpt.pdf",
+      "page_number": 47,
+      "entity": "Delhivery Limited",
+      "attribute": "PIN Codes Serviced",
+      "value_raw": "17,488 PIN codes",
+      "value_numeric": 17488.0,
+      "unit": "pin codes",
+      "temporal_anchor": "Dec 2021 (9M FY22)",
+      "scope": "Serviced Reach (90.61% of India)",
+      "quote": "serviced 17,488 PIN codes for the nine months period ended December 31, 2021, covering 90.61% of the 19,300 PIN codes in India",
+      "context_window": "Business Strengths section, Paragraph 1 on Page 47",
+      "confidence": 0.97,
+      "extraction_flags": []
+    },
+    {
+      "id": "delhivery_fact_06",
+      "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+      "page_number": 2,
+      "entity": "Delhivery Limited",
+      "attribute": "PIN Codes Serviced",
+      "value_raw": "18,793 PIN codes",
+      "value_numeric": 18793.0,
+      "unit": "pin codes",
+      "temporal_anchor": "FY24",
+      "scope": "Network Reach",
+      "quote": "18,793 (1) Pin codes covered across India",
+      "context_window": "Key Metrics Dashboard on Page 2",
+      "confidence": 0.98,
+      "extraction_flags": []
+    },
+    {
+      "id": "delhivery_fact_07",
+      "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+      "page_number": 35,
+      "entity": "Delhivery Limited",
+      "attribute": "Revenue from Operations",
+      "value_raw": "\u20b98,141.65 Crores",
+      "value_numeric": 8141.65,
+      "unit": "INR Crores",
+      "temporal_anchor": "FY24",
+      "scope": "Consolidated",
+      "quote": "Revenue from operations for FY24 reached Rs. 8,141.65 Crores",
+      "context_window": "Management Discussion and Analysis - Financial Performance on Page 35",
+      "confidence": 0.99,
+      "extraction_flags": []
+    },
+    {
+      "id": "delhivery_fact_08",
+      "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+      "page_number": 112,
+      "entity": "Delhivery Limited",
+      "attribute": "Revenue from Operations",
+      "value_raw": "\u20b97,858.91 Crores",
+      "value_numeric": 7858.91,
+      "unit": "INR Crores",
+      "temporal_anchor": "FY24",
+      "scope": "Standalone",
+      "quote": "Standalone Revenue from operations stood at Rs. 7,858.91 Crores",
+      "context_window": "Standalone Financial Statements - Statement of Profit and Loss on Page 112",
+      "confidence": 0.99,
+      "extraction_flags": []
+    },
+    {
+      "id": "delhivery_fact_09",
+      "document_id": "03-delhivery-q4-fy24-earnings-presentation.pdf",
+      "page_number": 5,
+      "entity": "Delhivery Limited",
+      "attribute": "Revenue from Operations",
+      "value_raw": "\u20b92,076 Crores",
+      "value_numeric": 2076.0,
+      "unit": "INR Crores",
+      "temporal_anchor": "Q4 FY24",
+      "scope": "Consolidated",
+      "quote": "Q4 FY24 Revenue from operations Rs 2,076 Cr",
+      "context_window": "Q4 FY24 Financial Overview Slide on Page 5",
+      "confidence": 0.98,
+      "extraction_flags": []
+    },
+    {
+      "id": "delhivery_fact_10",
+      "document_id": "01-delhivery-prospectus-2022-excerpt.pdf",
+      "page_number": 28,
+      "entity": "Delhivery Limited",
+      "attribute": "Restated Profit / (Loss) for the Year",
+      "value_raw": "\u20b9(4,157.43) million",
+      "value_numeric": 4157.43,
+      "unit": "INR million",
+      "temporal_anchor": "FY21",
+      "scope": "Restated Consolidated",
+      "quote": "Restated Loss for the year (4,157.43) million",
+      "context_window": "Summary Statement of Profit and Loss on Page 28",
+      "confidence": 0.65,
+      "extraction_flags": [
+        "extraction_failure_flag"
+      ]
+    }
+  ],
+  "verdicts": [
+    {
+      "id": "delh_v_01",
+      "topic": "Delhivery Limited: Express Parcel Shipment Volume in FY21",
+      "verdict_type": "CORROBORATED",
+      "fact_ids": [
+        "delhivery_fact_01",
+        "delhivery_fact_02"
+      ],
+      "facts": [
+        {
+          "id": "delhivery_fact_01",
+          "document_id": "01-delhivery-prospectus-2022-excerpt.pdf",
+          "page_number": 28,
+          "entity": "Delhivery Limited",
+          "attribute": "Express Parcel Shipment Volume",
+          "value_raw": "577.06 million",
+          "value_numeric": 577.06,
+          "unit": "million shipments",
+          "temporal_anchor": "FY21",
+          "scope": "Consolidated Restated",
+          "quote": "Our Express Parcel Services volume was 577.06 million orders in Fiscal 2021",
+          "context_window": "Summary Financial and Operating Data table on Page 28",
+          "confidence": 0.99,
+          "extraction_flags": []
+        },
+        {
+          "id": "delhivery_fact_02",
+          "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+          "page_number": 12,
+          "entity": "Delhivery Limited",
+          "attribute": "Express Parcel Shipment Volume",
+          "value_raw": "577.06 million",
+          "value_numeric": 577.06,
+          "unit": "million shipments",
+          "temporal_anchor": "FY21",
+          "scope": "Consolidated",
+          "quote": "Express parcel volume delivered in FY21 stood at 577.06 million orders",
+          "context_window": "Historical 5-year operating track record table on Page 12",
+          "confidence": 0.99,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Identical Express Parcel volume of 577.06M confirmed across Prospectus and FY24 Annual Report.",
+      "explanation": "Both the IPO Prospectus (2022) and the retrospective disclosures in the FY24 Annual Report report exactly 577.06 million shipments for FY21. Despite different publication dates, the retrospective historical accounting establishes direct corroboration.",
+      "divergence_dimension": "NONE",
+      "audit_notes": "Exact match on entity, attribute, temporal period (FY21), and numerical value (577.06M)."
+    },
+    {
+      "id": "delh_v_02",
+      "topic": "Delhivery Limited: Express Parcel Shipment Volume in FY24",
+      "verdict_type": "CORROBORATED",
+      "fact_ids": [
+        "delhivery_fact_03",
+        "delhivery_fact_04"
+      ],
+      "facts": [
+        {
+          "id": "delhivery_fact_03",
+          "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+          "page_number": 4,
+          "entity": "Delhivery Limited",
+          "attribute": "Express Parcel Shipment Volume",
+          "value_raw": "740 million",
+          "value_numeric": 740.0,
+          "unit": "million shipments",
+          "temporal_anchor": "FY24",
+          "scope": "Consolidated",
+          "quote": "740 Mn Express parcel shipments delivered during the financial year ended March 31, 2024",
+          "context_window": "Corporate Overview & Operational Highlights on Page 4",
+          "confidence": 0.98,
+          "extraction_flags": []
+        },
+        {
+          "id": "delhivery_fact_04",
+          "document_id": "03-delhivery-q4-fy24-earnings-presentation.pdf",
+          "page_number": 4,
+          "entity": "Delhivery Limited",
+          "attribute": "Express Parcel Shipment Volume",
+          "value_raw": "740 million",
+          "value_numeric": 740.0,
+          "unit": "million shipments",
+          "temporal_anchor": "FY24",
+          "scope": "Consolidated",
+          "quote": "FY24 Express Parcel volume reached 740M shipments",
+          "context_window": "FY24 Full Year Operational Performance Summary on Page 4",
+          "confidence": 0.98,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Express Parcel volume of 740M for FY24 corroborated across Annual Report and Earnings Call.",
+      "explanation": "Both the comprehensive FY24 Annual Report and the Q4 FY24 Investor Presentation independently report full-year Express Parcel volume of 740 million shipments.",
+      "divergence_dimension": "NONE",
+      "audit_notes": "Corroborated across primary statutory annual filing and investor relations presentation."
+    },
+    {
+      "id": "delh_v_03",
+      "topic": "Delhivery Limited: PIN Codes Reach",
+      "verdict_type": "APPARENT_CONTRADICTION",
+      "fact_ids": [
+        "delhivery_fact_05",
+        "delhivery_fact_06"
+      ],
+      "facts": [
+        {
+          "id": "delhivery_fact_05",
+          "document_id": "01-delhivery-prospectus-2022-excerpt.pdf",
+          "page_number": 47,
+          "entity": "Delhivery Limited",
+          "attribute": "PIN Codes Serviced",
+          "value_raw": "17,488 PIN codes",
+          "value_numeric": 17488.0,
+          "unit": "pin codes",
+          "temporal_anchor": "Dec 2021 (9M FY22)",
+          "scope": "Serviced Reach (90.61% of India)",
+          "quote": "serviced 17,488 PIN codes for the nine months period ended December 31, 2021, covering 90.61% of the 19,300 PIN codes in India",
+          "context_window": "Business Strengths section, Paragraph 1 on Page 47",
+          "confidence": 0.97,
+          "extraction_flags": []
+        },
+        {
+          "id": "delhivery_fact_06",
+          "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+          "page_number": 2,
+          "entity": "Delhivery Limited",
+          "attribute": "PIN Codes Serviced",
+          "value_raw": "18,793 PIN codes",
+          "value_numeric": 18793.0,
+          "unit": "pin codes",
+          "temporal_anchor": "FY24",
+          "scope": "Network Reach",
+          "quote": "18,793 (1) Pin codes covered across India",
+          "context_window": "Key Metrics Dashboard on Page 2",
+          "confidence": 0.98,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Apparent contradiction in PIN codes covered (17,488 vs 18,793) explained by network expansion over time.",
+      "explanation": "Prospectus reports 17,488 PIN codes as of December 2021, whereas the FY24 Annual Report reports 18,793 PIN codes. This numerical discrepancy of +1,305 PIN codes is an apparent contradiction resolved by temporal drift: the company expanded its delivery footprint between 2021 and 2024.",
+      "divergence_dimension": "TIME",
+      "audit_notes": "Resolved via temporal anchor: Dec 2021 vs FY24."
+    },
+    {
+      "id": "delh_v_04",
+      "topic": "Delhivery Limited: FY24 Revenue from Operations",
+      "verdict_type": "APPARENT_CONTRADICTION",
+      "fact_ids": [
+        "delhivery_fact_07",
+        "delhivery_fact_08"
+      ],
+      "facts": [
+        {
+          "id": "delhivery_fact_07",
+          "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+          "page_number": 35,
+          "entity": "Delhivery Limited",
+          "attribute": "Revenue from Operations",
+          "value_raw": "\u20b98,141.65 Crores",
+          "value_numeric": 8141.65,
+          "unit": "INR Crores",
+          "temporal_anchor": "FY24",
+          "scope": "Consolidated",
+          "quote": "Revenue from operations for FY24 reached Rs. 8,141.65 Crores",
+          "context_window": "Management Discussion and Analysis - Financial Performance on Page 35",
+          "confidence": 0.99,
+          "extraction_flags": []
+        },
+        {
+          "id": "delhivery_fact_08",
+          "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+          "page_number": 112,
+          "entity": "Delhivery Limited",
+          "attribute": "Revenue from Operations",
+          "value_raw": "\u20b97,858.91 Crores",
+          "value_numeric": 7858.91,
+          "unit": "INR Crores",
+          "temporal_anchor": "FY24",
+          "scope": "Standalone",
+          "quote": "Standalone Revenue from operations stood at Rs. 7,858.91 Crores",
+          "context_window": "Standalone Financial Statements - Statement of Profit and Loss on Page 112",
+          "confidence": 0.99,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Apparent contradiction in FY24 revenue (\u20b98,141.65 Cr vs \u20b97,858.91 Cr) resolved by Consolidated vs Standalone scope.",
+      "explanation": "The FY24 Annual Report contains two different revenue figures for the same fiscal year. The epistemic engine isolates the scope qualifier: \u20b98,141.65 Cr is the Consolidated figure (including operating subsidiaries such as Spoton Logistics), while \u20b97,858.91 Cr is the Standalone figure of the parent company.",
+      "divergence_dimension": "SCOPE",
+      "audit_notes": "Resolved via accounting perimeter: Consolidated vs Standalone."
+    },
+    {
+      "id": "delh_v_05",
+      "topic": "Delhivery Limited: Revenue from Operations Periodicity",
+      "verdict_type": "APPARENT_CONTRADICTION",
+      "fact_ids": [
+        "delhivery_fact_07",
+        "delhivery_fact_09"
+      ],
+      "facts": [
+        {
+          "id": "delhivery_fact_07",
+          "document_id": "02-delhivery-annual-report-fy24-excerpt.pdf",
+          "page_number": 35,
+          "entity": "Delhivery Limited",
+          "attribute": "Revenue from Operations",
+          "value_raw": "\u20b98,141.65 Crores",
+          "value_numeric": 8141.65,
+          "unit": "INR Crores",
+          "temporal_anchor": "FY24",
+          "scope": "Consolidated",
+          "quote": "Revenue from operations for FY24 reached Rs. 8,141.65 Crores",
+          "context_window": "Management Discussion and Analysis - Financial Performance on Page 35",
+          "confidence": 0.99,
+          "extraction_flags": []
+        },
+        {
+          "id": "delhivery_fact_09",
+          "document_id": "03-delhivery-q4-fy24-earnings-presentation.pdf",
+          "page_number": 5,
+          "entity": "Delhivery Limited",
+          "attribute": "Revenue from Operations",
+          "value_raw": "\u20b92,076 Crores",
+          "value_numeric": 2076.0,
+          "unit": "INR Crores",
+          "temporal_anchor": "Q4 FY24",
+          "scope": "Consolidated",
+          "quote": "Q4 FY24 Revenue from operations Rs 2,076 Cr",
+          "context_window": "Q4 FY24 Financial Overview Slide on Page 5",
+          "confidence": 0.98,
+          "extraction_flags": []
+        }
+      ],
+      "summary": "Apparent contradiction in revenue (\u20b98,141.65 Cr vs \u20b92,076 Cr) resolved by periodicity (Full Year vs Q4 Quarter).",
+      "explanation": "The earnings presentation states revenue of \u20b92,076 Cr while the annual report states \u20b98,141.65 Cr. The reconciliation engine identifies that the former represents the 3-month fourth quarter (Q4 FY24) while the latter represents the 12-month annual period.",
+      "divergence_dimension": "TIME",
+      "audit_notes": "Resolved via temporal periodicity: Annual vs Q4."
+    },
+    {
+      "id": "delh_v_06",
+      "topic": "Delhivery Limited: Restated Net Loss FY21",
+      "verdict_type": "EXTRACTION_FAILURE",
+      "fact_ids": [
+        "delhivery_fact_10"
+      ],
+      "facts": [
+        {
+          "id": "delhivery_fact_10",
+          "document_id": "01-delhivery-prospectus-2022-excerpt.pdf",
+          "page_number": 28,
+          "entity": "Delhivery Limited",
+          "attribute": "Restated Profit / (Loss) for the Year",
+          "value_raw": "\u20b9(4,157.43) million",
+          "value_numeric": 4157.43,
+          "unit": "INR million",
+          "temporal_anchor": "FY21",
+          "scope": "Restated Consolidated",
+          "quote": "Restated Loss for the year (4,157.43) million",
+          "context_window": "Summary Statement of Profit and Loss on Page 28",
+          "confidence": 0.65,
+          "extraction_flags": [
+            "extraction_failure_flag"
+          ]
+        }
+      ],
+      "summary": "Extraction / reasoning failure: Parenthesized negative number in financial table misattributed as positive profit.",
+      "explanation": "The source prospectus on page 28 formats net loss as '(4,157.43)' million following Indian Accounting Standard (Ind AS) conventions where parentheses denote negative values. A naive text parser strips parentheses and emits a positive net profit of \u20b94,157.43 million, causing a false contradiction with subsequent reports showing historic losses.",
+      "divergence_dimension": "NONE",
+      "audit_notes": "Handled by KnowledgeAuditor: detects parentheses in financial rows and enforces algebraic sign negation (-4,157.43)."
+    }
+  ]
+}
