@@ -15,6 +15,19 @@ let expandedDocIds = new Set();
 document.addEventListener('DOMContentLoaded', () => {
   fetchState();
   fetchDocuments();
+  initHeroCanvas();
+
+  // Press Enter anywhere on the landing page to proceed
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && currentView === 'landing') {
+      const activeEl = document.activeElement;
+      // Only proceed if user is not typing in an input/textarea
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+        return;
+      }
+      switchView('reconcile');
+    }
+  });
 });
 
 async function fetchState() {
@@ -93,6 +106,12 @@ function switchView(viewName) {
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (viewName === 'landing') {
+    startHeroCanvas();
+  } else {
+    stopHeroCanvas();
+  }
 
   if (viewName === 'documents') {
     fetchDocuments();
@@ -545,3 +564,177 @@ function showToast(message) {
     toast.classList.add('hidden');
   }, 4500);
 }
+
+/* ==========================================================================
+   Interactive Epistemic Knowledge Graph Canvas
+   ========================================================================== */
+let heroAnimationId = null;
+let heroNodes = [];
+let heroMouse = { x: -9999, y: -9999, radius: 140 };
+let heroCanvasInitialized = false;
+
+function initHeroCanvas() {
+  const canvas = document.getElementById('networkCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let width = 0;
+  let height = 0;
+
+  function resize() {
+    if (!canvas.parentElement) return;
+    const rect = canvas.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    createNodes();
+  }
+
+  function createNodes() {
+    heroNodes = [];
+    const count = Math.min(50, Math.max(25, Math.floor((width * height) / 22000)));
+    const colors = [
+      '#2563EB', // Claim blue
+      '#10B981', // Grounded green
+      '#6366F1', // Entity purple
+      '#F59E0B', // Dialectic amber
+      '#64748B'  // Neutral slate
+    ];
+
+    for (let i = 0; i < count; i++) {
+      heroNodes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.45,
+        radius: Math.random() * 2.2 + 2.0,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        pulse: Math.random() * Math.PI * 2,
+        hasRing: Math.random() > 0.65
+      });
+    }
+  }
+
+  if (!heroCanvasInitialized) {
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      heroMouse.x = e.clientX - rect.left;
+      heroMouse.y = e.clientY - rect.top;
+    });
+    window.addEventListener('mouseleave', () => {
+      heroMouse.x = -9999;
+      heroMouse.y = -9999;
+    });
+    heroCanvasInitialized = true;
+  }
+
+  resize();
+
+  function render() {
+    if (currentView !== 'landing') {
+      heroAnimationId = null;
+      return;
+    }
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Update and render nodes
+    for (let i = 0; i < heroNodes.length; i++) {
+      const n = heroNodes[i];
+      n.x += n.vx;
+      n.y += n.vy;
+      n.pulse += 0.025;
+
+      if (n.x < -15) n.x = width + 15;
+      if (n.x > width + 15) n.x = -15;
+      if (n.y < -15) n.y = height + 15;
+      if (n.y > height + 15) n.y = -15;
+
+      // Mouse gentle interaction
+      const dxM = heroMouse.x - n.x;
+      const dyM = heroMouse.y - n.y;
+      const distM = Math.hypot(dxM, dyM);
+      if (distM < heroMouse.radius && distM > 0) {
+        const force = (1 - distM / heroMouse.radius) * 1.2;
+        n.x -= (dxM / distM) * force;
+        n.y -= (dyM / distM) * force;
+      }
+
+      // Draw node circle
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
+      ctx.fillStyle = n.color;
+      ctx.globalAlpha = 0.75;
+      ctx.fill();
+
+      // Outer halo/ring for select nodes
+      if (n.hasRing) {
+        const pulseRadius = n.radius + 3.5 + Math.sin(n.pulse) * 1.5;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, pulseRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = n.color;
+        ctx.lineWidth = 0.8;
+        ctx.globalAlpha = 0.22;
+        ctx.stroke();
+      }
+
+      // Draw connections
+      for (let j = i + 1; j < heroNodes.length; j++) {
+        const n2 = heroNodes[j];
+        const dx = n.x - n2.x;
+        const dy = n.y - n2.y;
+        const dist = Math.hypot(dx, dy);
+        const maxDist = 125;
+
+        if (dist < maxDist) {
+          const alpha = (1 - dist / maxDist) * 0.2;
+          ctx.beginPath();
+          ctx.moveTo(n.x, n.y);
+          ctx.lineTo(n2.x, n2.y);
+          ctx.strokeStyle = '#94A3B8';
+          ctx.globalAlpha = alpha;
+          ctx.lineWidth = 0.75;
+          ctx.stroke();
+        }
+      }
+
+      // Connection to mouse cursor
+      if (distM < 110) {
+        const alpha = (1 - distM / 110) * 0.35;
+        ctx.beginPath();
+        ctx.moveTo(n.x, n.y);
+        ctx.lineTo(heroMouse.x, heroMouse.y);
+        ctx.strokeStyle = '#38BDF8';
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = 0.9;
+        ctx.stroke();
+      }
+    }
+
+    ctx.globalAlpha = 1.0;
+    heroAnimationId = requestAnimationFrame(render);
+  }
+
+  if (heroAnimationId) {
+    cancelAnimationFrame(heroAnimationId);
+  }
+  heroAnimationId = requestAnimationFrame(render);
+}
+
+function startHeroCanvas() {
+  if (!heroAnimationId && currentView === 'landing') {
+    initHeroCanvas();
+  }
+}
+
+function stopHeroCanvas() {
+  if (heroAnimationId) {
+    cancelAnimationFrame(heroAnimationId);
+    heroAnimationId = null;
+  }
+}
+

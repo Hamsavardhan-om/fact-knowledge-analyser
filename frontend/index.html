@@ -49,102 +49,39 @@
 
     <!-- VIEW 0: SEPARATE DEDICATED LANDING PAGE -->
     <section id="viewLanding" class="landing-hero">
+      <!-- Interactive Epistemic Knowledge Graph Canvas -->
+      <canvas id="networkCanvas" class="hero-canvas"></canvas>
+
       <div class="landing-container">
         <div class="landing-pill">
           <span class="pill-pulse"></span>
-          Epistemic Fact Knowledge Layer &bull; Architecture Showcase
+          <span>Epistemic Fact Knowledge Layer</span>
         </div>
 
         <h1 class="landing-headline">
-          Grounded Fact Extraction &amp; <br/>
-          <span class="highlight-text">Dialectic Cross-Document Reconciliation</span>
+          Truth across documents,<br />
+          <span class="highlight-text">grounded in context.</span>
         </h1>
 
         <p class="landing-description">
-          Important facts are scattered across corporate filings, institutional reports, and statutory disclosures—often stated in different formats, separated by reporting vintages, or seemingly in conflict.
-        </p>
-        <p class="landing-sub-description">
-          <strong>EFKL</strong> is an autonomous, schema-agnostic engine that decomposes unstructured multi-page PDFs into grounded <em>Epistemic Fact Atoms</em>, binds every assertion to verbatim source coordinates, and systematically evaluates cross-document relationships across <strong>Corroboration</strong>, <strong>Genuine Contradictions</strong>, <strong>Contextual Resolution (Time, Scope, Units)</strong>, and <strong>Honest Error Audits</strong>.
+          Autonomous cross-document fact extraction, verifiable PDF provenance, and dialectic reconciliation across corporate and macroeconomic filings.
         </p>
 
         <div class="landing-actions">
-          <button class="btn btn-lg btn-primary" onclick="switchView('reconcile')">
-            Launch Knowledge Explorer &rarr;
+          <button class="btn-hero-proceed" onclick="switchView('reconcile')">
+            <span class="proceed-text">Proceed to Knowledge Layer</span>
+            <svg class="proceed-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14"/>
+              <path d="m12 5 7 7-7 7"/>
+            </svg>
           </button>
-          <button class="btn btn-lg btn-outline" onclick="switchView('documents')">
-            Inspect Ingested Documents
-          </button>
-          <button class="btn btn-lg btn-ghost" onclick="openUploadModal()">
-            Upload Custom PDF &uarr;
-          </button>
+          <div class="landing-shortcut-hint">Press <kbd>↵ Enter</kbd> to proceed</div>
         </div>
 
-        <!-- 4 Core Cases Preview Cards -->
-        <div class="landing-cards-grid">
-          <div class="landing-card" onclick="switchView('reconcile'); setFilter('CORROBORATED')">
-            <div class="card-top">
-              <span class="badge badge-corr">Case 1</span>
-              <span class="card-icon">&#10003;</span>
-            </div>
-            <h3>Corroboration Across Docs</h3>
-            <p>Identifies exact numerical and semantic agreement across independent reports even when separated by years of reporting drift (e.g. Delhivery FY21 Volume 577.06M).</p>
-            <span class="card-link">Explore Case 1 &rarr;</span>
-          </div>
-
-          <div class="landing-card" onclick="switchView('reconcile'); setFilter('GENUINE_CONTRADICTION')">
-            <div class="card-top">
-              <span class="badge badge-gen">Case 2</span>
-              <span class="card-icon">&#10007;</span>
-            </div>
-            <h3>Genuine Contradictions</h3>
-            <p>Pinpoints irreconcilable institutional clashes where time, entity, metric, and scope are identical, but published numbers disagree (e.g. RBI $11.2B Forex reserves disparity).</p>
-            <span class="card-link">Explore Case 2 &rarr;</span>
-          </div>
-
-          <div class="landing-card" onclick="switchView('reconcile'); setFilter('APPARENT_CONTRADICTION')">
-            <div class="card-top">
-              <span class="badge badge-app">Case 3</span>
-              <span class="card-icon">&#9878;</span>
-            </div>
-            <h3>Contextual Reconciliation</h3>
-            <p>Explains apparent conflicts through first principles: <strong>Time</strong> (network growth), <strong>Scope</strong> (Consolidated vs Standalone), and <strong>Baskets</strong> (Headline vs Core CPI).</p>
-            <span class="card-link">Explore Case 3 &rarr;</span>
-          </div>
-
-          <div class="landing-card" onclick="switchView('reconcile'); setFilter('EXTRACTION_FAILURE')">
-            <div class="card-top">
-              <span class="badge badge-fail">Case 4</span>
-              <span class="card-icon">&#128269;</span>
-            </div>
-            <h3>Audited Failure Analysis</h3>
-            <p>Adversarially spots parsing traps—such as Indian Accounting Standard (Ind AS) parenthesized balance-sheet losses parsed as positive profits—and enforces sign inversion.</p>
-            <span class="card-link">Explore Case 4 &rarr;</span>
-          </div>
-        </div>
-
-        <!-- Provenance Architecture Highlights -->
-        <div class="landing-footer-features">
-          <div class="feature-item">
-            <span class="feature-icon">&#9889;</span>
-            <div>
-              <strong>Streaming Perception</strong>
-              <p>PyMuPDF page-by-page layout streaming to handle 100+ page institutional PDFs without token exhaustion.</p>
-            </div>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">&#128206;</span>
-            <div>
-              <strong>Verbatim Evidence Grounding</strong>
-              <p>Every extracted assertion contains exact page numbers, surrounding context, and verifiable quotes.</p>
-            </div>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">&#128260;</span>
-            <div>
-              <strong>Incremental Ingestion</strong>
-              <p>Newly uploaded documents align with existing discourse clusters in $O(k)$ time without re-indexing from scratch.</p>
-            </div>
-          </div>
+        <div class="hero-chips">
+          <span class="hero-chip">📄 Multi-Page PDF Perception</span>
+          <span class="hero-chip">🔬 Verbatim Provenance Verification</span>
+          <span class="hero-chip">⚖️ 4-Case Dialectic Engine</span>
         </div>
       </div>
     </section>
