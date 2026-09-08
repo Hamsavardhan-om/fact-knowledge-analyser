@@ -13,6 +13,7 @@ let expandedDocIds = new Set();
 
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
+  switchView('landing');
   fetchState();
   fetchDocuments();
   initHeroCanvas();
@@ -76,8 +77,18 @@ function updateNavCounts() {
 
 function switchView(viewName) {
   currentView = viewName;
+  const isLanding = (viewName === 'landing');
 
-  // Update navbar links
+  // Toggle navbar links & controls: HIDDEN on landing, visible in knowledge layer
+  const mainNavbar = document.getElementById('mainNavbar');
+  const mainNavLinks = document.getElementById('mainNavLinks');
+  const mainNavControls = document.getElementById('mainNavControls');
+
+  if (mainNavbar) mainNavbar.classList.toggle('landing-navbar', isLanding);
+  if (mainNavLinks) mainNavLinks.classList.toggle('hidden', isLanding);
+  if (mainNavControls) mainNavControls.classList.toggle('hidden', isLanding);
+
+  // Update navbar links active state
   const navLanding = document.getElementById('navLanding');
   const navReconcile = document.getElementById('navReconcile');
   const navDocuments = document.getElementById('navDocuments');
@@ -95,14 +106,14 @@ function switchView(viewName) {
   const viewFacts = document.getElementById('viewFacts');
   const metricsSection = document.getElementById('metricsSection');
 
-  if (viewLanding) viewLanding.classList.toggle('hidden', viewName !== 'landing');
+  if (viewLanding) viewLanding.classList.toggle('hidden', !isLanding);
   if (viewReconcile) viewReconcile.classList.toggle('hidden', viewName !== 'reconcile');
   if (viewDocuments) viewDocuments.classList.toggle('hidden', viewName !== 'documents');
   if (viewFacts) viewFacts.classList.toggle('hidden', viewName !== 'facts');
 
   // Metrics banner is hidden on landing page, shown on explorer views
   if (metricsSection) {
-    metricsSection.classList.toggle('hidden', viewName === 'landing');
+    metricsSection.classList.toggle('hidden', isLanding);
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });

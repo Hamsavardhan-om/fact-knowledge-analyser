@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Epistemic Fact Knowledge Layer (EFKL)</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/style.css?v=2.2" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,18 +12,21 @@
 <body>
   <div class="app-layout">
     <!-- Navbar -->
-    <header class="navbar">
+    <header class="navbar landing-navbar" id="mainNavbar">
       <div class="nav-left">
-        <div class="brand" onclick="switchView('landing')" style="cursor: pointer;">
+        <div class="brand" onclick="switchView('landing')" style="cursor: pointer;" title="EFKL Knowledge Layer">
           <div class="brand-badge">EFKL</div>
           <div class="brand-text">
             <h1>Fact Knowledge Layer</h1>
             <span class="tagline">Superjoin VIT 2026 Hiring Assignment</span>
           </div>
         </div>
-        <!-- Main Navigation Links -->
-        <nav class="nav-links">
-          <button class="nav-link active" id="navLanding" onclick="switchView('landing')">Overview</button>
+        <!-- Main Navigation Links (Hidden on Landing) -->
+        <nav class="nav-links hidden" id="mainNavLinks">
+          <button class="nav-link" id="navLanding" onclick="switchView('landing')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+            Overview
+          </button>
           <button class="nav-link" id="navReconcile" onclick="switchView('reconcile')">Reconciliation Engine</button>
           <button class="nav-link" id="navDocuments" onclick="switchView('documents')">
             Ingested Documents <span class="badge-count" id="navDocCount">0</span>
@@ -34,7 +37,8 @@
         </nav>
       </div>
 
-      <div class="nav-controls">
+      <!-- Nav Controls (Hidden on Landing) -->
+      <div class="nav-controls hidden" id="mainNavControls">
         <div class="dataset-switcher">
           <span class="label">Benchmark:</span>
           <button class="btn btn-sm btn-outline active" id="btnLoadDelhivery" onclick="loadBenchmark('delhivery')">Delhivery</button>
@@ -246,6 +250,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=2.2"></script>
 </body>
 </html>
