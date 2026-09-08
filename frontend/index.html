@@ -4,12 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Epistemic Fact Knowledge Layer (EFKL)</title>
-  <link rel="stylesheet" href="/static/style.css?v=2.2" />
+  <link rel="stylesheet" href="/static/style.css?v=2.4" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- Ambient Global Background (Canvas + Subtle Aurora Blobs) for ALL Pages -->
+  <div class="ambient-bg-container" aria-hidden="true">
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2"></div>
+    <div class="ambient-blob blob-3"></div>
+    <canvas id="ambientBackgroundCanvas" class="ambient-bg-canvas"></canvas>
+  </div>
+
   <div class="app-layout">
     <!-- Navbar -->
     <header class="navbar landing-navbar" id="mainNavbar">
@@ -53,9 +61,6 @@
 
     <!-- VIEW 0: SEPARATE DEDICATED LANDING PAGE -->
     <section id="viewLanding" class="landing-hero">
-      <!-- Interactive Epistemic Knowledge Graph Canvas -->
-      <canvas id="networkCanvas" class="hero-canvas"></canvas>
-
       <div class="landing-container">
         <div class="landing-pill">
           <span class="pill-pulse"></span>
@@ -250,6 +255,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=2.2"></script>
+  <script src="/static/app.js?v=2.4"></script>
 </body>
 </html>
