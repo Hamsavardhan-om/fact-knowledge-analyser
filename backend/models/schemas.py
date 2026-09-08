@@ -58,6 +58,8 @@ class DocumentSummary(BaseModel):
     extracted_facts_count: int
     file_size_bytes: int
     upload_timestamp: str
+    is_benchmark: bool = Field(default=False)
+    benchmark_name: Optional[str] = Field(default=None)
 
 
 class KnowledgeLayerState(BaseModel):

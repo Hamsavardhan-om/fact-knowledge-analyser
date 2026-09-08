@@ -298,6 +298,7 @@ function renderDocumentsView() {
             </div>
           </div>
           <div class="doc-meta-pills">
+            ${doc.is_benchmark ? '<span class="meta-pill" style="background: rgba(99, 102, 241, 0.12); color: #818CF8; border-color: rgba(99, 102, 241, 0.3);">🏷️ Benchmark</span>' : '<span class="meta-pill" style="background: rgba(16, 185, 129, 0.15); color: #10B981; border-color: rgba(16, 185, 129, 0.3); font-weight: 700;">✨ Custom Upload</span>'}
             <span class="meta-pill">📄 ${doc.total_pages} Pages</span>
             <span class="meta-pill meta-pill-highlight">⚡ ${doc.extracted_facts_count} Facts</span>
             <span class="meta-pill">✓ Grounded</span>
@@ -422,8 +423,10 @@ async function loadBenchmark(datasetName) {
     const data = await res.json();
     currentState = data.state;
     renderDashboard();
-    fetchDocuments();
-    showToast(`Loaded ${datasetName} benchmark!`);
+    renderFactsView();
+    await fetchDocuments();
+    updateNavCounts();
+    showToast(`Switched to ${datasetName} benchmark (custom uploads preserved)!`);
   } catch (err) {
     showToast(`Error: ${err.message}`);
   }

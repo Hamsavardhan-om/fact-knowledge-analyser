@@ -172,3 +172,44 @@ def test_reconcile_all_clusters(reconciler):
     assert len(verdicts) == 1
     assert verdicts[0].verdict_type == VerdictType.CORROBORATED
 
+
+def test_custom_upload_persists_across_benchmark_swaps():
+    from backend.core.storage import KnowledgeStore
+    from backend.models.schemas import DocumentSummary
+
+    store = KnowledgeStore()
+    
+    # 1. Ingest a custom user document
+    doc = DocumentSummary(
+        document_id="user_uploaded_financials.pdf",
+        total_pages=5,
+        extracted_facts_count=1,
+        file_size_bytes=50000,
+        upload_timestamp="2026-09-09T00:00:00"
+    )
+    fact = FactAtom(
+        id="custom_fact_999",
+        document_id="user_uploaded_financials.pdf",
+        page_number=1,
+        entity="Acme Corp",
+        attribute="Net Profit",
+        value_raw="$100M",
+        quote="Net profit reached $100M"
+    )
+    store.ingest_facts(doc, [fact])
+    assert "user_uploaded_financials.pdf" in store.documents
+    assert "custom_fact_999" in store.facts
+
+    # 2. Swap benchmark to Delhivery
+    store.load_benchmark("delhivery")
+    assert "user_uploaded_financials.pdf" in store.documents, "Custom uploaded doc must NOT vanish on benchmark load!"
+    assert "custom_fact_999" in store.facts, "Custom uploaded fact must NOT vanish on benchmark load!"
+    assert any("delhivery" in d.lower() for d in store.documents.keys())
+
+    # 3. Swap benchmark to India Macro
+    store.load_benchmark("india-macroeconomy")
+    assert "user_uploaded_financials.pdf" in store.documents, "Custom uploaded doc must NOT vanish on macro benchmark load!"
+    assert "custom_fact_999" in store.facts, "Custom uploaded fact must NOT vanish on macro benchmark load!"
+    assert any("rbi" in d.lower() for d in store.documents.keys())
+
+

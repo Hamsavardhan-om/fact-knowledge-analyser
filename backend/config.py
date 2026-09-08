@@ -10,6 +10,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 DATA_DIR = BASE_DIR / "backend" / "data"
 UPLOADS_DIR = DATA_DIR / "raw_uploads"
 STORAGE_FILE = DATA_DIR / "storage.json"
+CUSTOM_UPLOADS_FILE = DATA_DIR / "custom_uploads.json"
 BENCHMARKS_DIR = DATA_DIR / "precomputed"
 
 # Ensure directories exist
