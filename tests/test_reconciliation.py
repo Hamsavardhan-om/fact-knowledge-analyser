@@ -196,20 +196,29 @@ def test_custom_upload_persists_across_benchmark_swaps():
         value_raw="$100M",
         quote="Net profit reached $100M"
     )
-    store.ingest_facts(doc, [fact])
-    assert "user_uploaded_financials.pdf" in store.documents
-    assert "custom_fact_999" in store.facts
+    try:
+        store.ingest_facts(doc, [fact])
+        assert "user_uploaded_financials.pdf" in store.custom_documents
+        assert "custom_fact_999" in store.custom_facts
 
-    # 2. Swap benchmark to Delhivery
-    store.load_benchmark("delhivery")
-    assert "user_uploaded_financials.pdf" in store.documents, "Custom uploaded doc must NOT vanish on benchmark load!"
-    assert "custom_fact_999" in store.facts, "Custom uploaded fact must NOT vanish on benchmark load!"
-    assert any("delhivery" in d.lower() for d in store.documents.keys())
+        # 2. Swap benchmark to Delhivery
+        store.load_benchmark("delhivery")
+        assert "user_uploaded_financials.pdf" in store.custom_documents, "Custom uploaded doc must persist in custom_documents!"
+        assert "custom_fact_999" in store.custom_facts, "Custom uploaded fact must persist in custom_facts!"
+        assert len(store.documents) == 3, "Delhivery benchmark must strictly contain exactly 3 documents!"
+        assert "user_uploaded_financials.pdf" not in store.documents, "Custom upload must not leak into benchmark documents!"
+        assert any("delhivery" in d.lower() for d in store.documents.keys())
 
-    # 3. Swap benchmark to India Macro
-    store.load_benchmark("india-macroeconomy")
-    assert "user_uploaded_financials.pdf" in store.documents, "Custom uploaded doc must NOT vanish on macro benchmark load!"
-    assert "custom_fact_999" in store.facts, "Custom uploaded fact must NOT vanish on macro benchmark load!"
-    assert any("rbi" in d.lower() for d in store.documents.keys())
+        # 3. Swap benchmark to India Macro
+        store.load_benchmark("india-macroeconomy")
+        assert "user_uploaded_financials.pdf" in store.custom_documents, "Custom uploaded doc must persist in custom_documents!"
+        assert "custom_fact_999" in store.custom_facts, "Custom uploaded fact must persist in custom_facts!"
+        assert len(store.documents) == 3, "Macro benchmark must strictly contain exactly 3 documents!"
+        assert "user_uploaded_financials.pdf" not in store.documents, "Custom upload must not leak into benchmark documents!"
+        assert any("rbi" in d.lower() for d in store.documents.keys())
+    finally:
+        store.custom_documents.pop("user_uploaded_financials.pdf", None)
+        store.custom_facts.pop("custom_fact_999", None)
+        store._save_custom_uploads()
 
 

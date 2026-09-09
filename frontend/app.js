@@ -3,8 +3,9 @@
  */
 
 let currentState = null;
-let currentDocuments = [];
-let currentView = 'landing'; // 'landing' | 'reconcile' | 'documents' | 'facts'
+let currentBenchmarkDocs = [];
+let currentCustomDocs = [];
+let currentView = 'landing'; // 'landing' | 'reconcile' | 'documents' | 'custom' | 'facts'
 let currentFilter = 'ALL';
 let searchQuery = '';
 let factsSearchQuery = '';
@@ -55,10 +56,14 @@ async function fetchState() {
 
 async function fetchDocuments() {
   try {
-    const res = await fetch('/api/documents');
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    currentDocuments = await res.json();
+    const [benchRes, customRes] = await Promise.all([
+      fetch('/api/documents?source=benchmark'),
+      fetch('/api/documents?source=custom')
+    ]);
+    if (benchRes.ok) currentBenchmarkDocs = await benchRes.json();
+    if (customRes.ok) currentCustomDocs = await customRes.json();
     renderDocumentsView();
+    renderCustomDocumentsView();
     updateNavCounts();
   } catch (err) {
     console.error('Failed to fetch documents:', err);
@@ -66,13 +71,23 @@ async function fetchDocuments() {
 }
 
 function updateNavCounts() {
-  const docCount = currentDocuments.length || (currentState ? currentState.documents.length : 0);
+  const benchDocCount = currentBenchmarkDocs.length;
+  const customDocCount = currentCustomDocs.length;
   const factCount = currentState ? currentState.total_facts : 0;
   
   const navDoc = document.getElementById('navDocCount');
+  const navCustom = document.getElementById('navCustomCount');
   const navFact = document.getElementById('navFactCount');
-  if (navDoc) navDoc.textContent = docCount;
+  const statDocs = document.getElementById('statDocs');
+  const statCustomDocs = document.getElementById('statCustomDocs');
+  const statFacts = document.getElementById('statFacts');
+
+  if (navDoc) navDoc.textContent = benchDocCount;
+  if (navCustom) navCustom.textContent = customDocCount;
   if (navFact) navFact.textContent = factCount;
+  if (statDocs) statDocs.textContent = benchDocCount;
+  if (statCustomDocs) statCustomDocs.textContent = customDocCount;
+  if (statFacts) statFacts.textContent = factCount;
 }
 
 function switchView(viewName) {
@@ -92,23 +107,27 @@ function switchView(viewName) {
   const navLanding = document.getElementById('navLanding');
   const navReconcile = document.getElementById('navReconcile');
   const navDocuments = document.getElementById('navDocuments');
+  const navCustom = document.getElementById('navCustom');
   const navFacts = document.getElementById('navFacts');
 
   if (navLanding) navLanding.classList.toggle('active', viewName === 'landing');
   if (navReconcile) navReconcile.classList.toggle('active', viewName === 'reconcile');
   if (navDocuments) navDocuments.classList.toggle('active', viewName === 'documents');
+  if (navCustom) navCustom.classList.toggle('active', viewName === 'custom');
   if (navFacts) navFacts.classList.toggle('active', viewName === 'facts');
 
   // Toggle view sections
   const viewLanding = document.getElementById('viewLanding');
   const viewReconcile = document.getElementById('viewReconcile');
   const viewDocuments = document.getElementById('viewDocuments');
+  const viewCustom = document.getElementById('viewCustom');
   const viewFacts = document.getElementById('viewFacts');
   const metricsSection = document.getElementById('metricsSection');
 
   if (viewLanding) viewLanding.classList.toggle('hidden', !isLanding);
   if (viewReconcile) viewReconcile.classList.toggle('hidden', viewName !== 'reconcile');
   if (viewDocuments) viewDocuments.classList.toggle('hidden', viewName !== 'documents');
+  if (viewCustom) viewCustom.classList.toggle('hidden', viewName !== 'custom');
   if (viewFacts) viewFacts.classList.toggle('hidden', viewName !== 'facts');
 
   // Metrics banner is hidden on landing page, shown on explorer views
@@ -119,6 +138,8 @@ function switchView(viewName) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (viewName === 'documents') {
+    fetchDocuments();
+  } else if (viewName === 'custom') {
     fetchDocuments();
   } else if (viewName === 'facts') {
     renderFactsView();
@@ -131,7 +152,9 @@ function renderDashboard() {
   if (!currentState) return;
 
   // 1. Update Metrics Banner
-  document.getElementById('statDocs').textContent = currentState.documents.length;
+  document.getElementById('statDocs').textContent = currentBenchmarkDocs.length || (currentState.documents ? currentState.documents.length : 3);
+  const statCustom = document.getElementById('statCustomDocs');
+  if (statCustom) statCustom.textContent = currentCustomDocs.length;
   document.getElementById('statFacts').textContent = currentState.total_facts;
   document.getElementById('statCorroborated').textContent = currentState.verdict_counts.CORROBORATED || 0;
   document.getElementById('statContradictions').textContent = currentState.verdict_counts.GENUINE_CONTRADICTION || 0;
@@ -222,26 +245,23 @@ function renderVerdictCard(v) {
   `;
 }
 
-/* Render Ingested Documents Page */
+/* Render Ingested Benchmark Documents Page (Strictly Curated Benchmark Files) */
 function renderDocumentsView() {
   const container = document.getElementById('documentsList');
   if (!container) return;
 
-  if (currentDocuments.length === 0) {
+  if (currentBenchmarkDocs.length === 0) {
     container.innerHTML = `
       <div class="doc-card" style="text-align: center; padding: 3rem;">
-        <p style="color: #94A3B8;">No documents ingested yet. Upload a PDF to begin knowledge extraction.</p>
+        <p style="color: #94A3B8;">Loading benchmark dataset documents...</p>
       </div>
     `;
     return;
   }
 
-  container.innerHTML = currentDocuments.map(doc => {
+  container.innerHTML = currentBenchmarkDocs.map(doc => {
     const isExpanded = expandedDocIds.has(doc.document_id);
     const sizeKb = (doc.file_size_bytes / 1024).toFixed(1);
-    const dateFormatted = new Date(doc.upload_timestamp).toLocaleString([], {
-      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
 
     let factsListHtml = '';
     if (isExpanded) {
@@ -292,20 +312,20 @@ function renderDocumentsView() {
             <div>
               <h3 class="doc-card-title">${doc.document_id}</h3>
               <div class="doc-card-sub">
-                <span>📅 Ingested: ${dateFormatted}</span>
+                <span>🏷️ Official Benchmark Filing</span>
                 <span>📦 Size: ${sizeKb} KB</span>
               </div>
             </div>
           </div>
           <div class="doc-meta-pills">
-            ${doc.is_benchmark ? '<span class="meta-pill" style="background: rgba(99, 102, 241, 0.12); color: #818CF8; border-color: rgba(99, 102, 241, 0.3);">🏷️ Benchmark</span>' : '<span class="meta-pill" style="background: rgba(16, 185, 129, 0.15); color: #10B981; border-color: rgba(16, 185, 129, 0.3); font-weight: 700;">✨ Custom Upload</span>'}
+            <span class="meta-pill" style="background: rgba(99, 102, 241, 0.12); color: #818CF8; border-color: rgba(99, 102, 241, 0.3); font-weight: 700;">🏷️ Benchmark Dataset</span>
             <span class="meta-pill">📄 ${doc.total_pages} Pages</span>
             <span class="meta-pill meta-pill-highlight">⚡ ${doc.extracted_facts_count} Facts</span>
             <span class="meta-pill">✓ Grounded</span>
           </div>
         </div>
         <div class="doc-actions">
-          <button class="btn btn-sm btn-outline" onclick="toggleDocFacts('${doc.document_id}')">
+          <button class="btn btn-sm btn-outline" onclick="toggleDocFacts('${doc.document_id}', false)">
             ${isExpanded ? '▲ Hide Extracted Facts' : `▼ Inspect Extracted Facts (${doc.extracted_facts_count})`}
           </button>
         </div>
@@ -315,13 +335,113 @@ function renderDocumentsView() {
   }).join('');
 }
 
-function toggleDocFacts(docId) {
+/* Render Separate Custom Uploads Page */
+function renderCustomDocumentsView() {
+  const container = document.getElementById('customDocumentsList');
+  if (!container) return;
+
+  if (currentCustomDocs.length === 0) {
+    container.innerHTML = `
+      <div class="doc-card" style="text-align: center; padding: 3rem;">
+        <p style="color: #94A3B8; margin-bottom: 1rem;">No custom documents uploaded yet.</p>
+        <button class="btn btn-sm btn-primary" onclick="openUploadModal()">
+          Ingest Your First PDF
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = currentCustomDocs.map(doc => {
+    const isExpanded = expandedDocIds.has(doc.document_id);
+    const sizeKb = (doc.file_size_bytes / 1024).toFixed(1);
+    const dateFormatted = new Date(doc.upload_timestamp).toLocaleString([], {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+
+    let factsListHtml = '';
+    if (isExpanded) {
+      if (!doc.facts || doc.facts.length === 0) {
+        factsListHtml = `
+          <div class="doc-facts-box">
+            <p style="color: #94A3B8; font-size: 0.82rem;">No facts extracted or verified for this document yet.</p>
+          </div>
+        `;
+      } else {
+        const items = doc.facts.map(f => `
+          <div class="fact-item-card">
+            <div class="fact-item-header">
+              <span class="fact-item-title">${f.entity} &bull; ${f.attribute}</span>
+              <span class="page-badge">Page ${f.page_number}</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.4rem; align-items: center;">
+              <span class="fact-item-val">${f.value_raw}</span>
+              ${f.temporal_anchor ? `<span class="tag">⏱️ ${f.temporal_anchor}</span>` : ''}
+              ${f.scope ? `<span class="tag">🔍 ${f.scope}</span>` : ''}
+            </div>
+            <div class="evidence-quote">
+              "${f.quote}"
+            </div>
+            <button class="btn-audit" style="margin-top: 0.4rem;" onclick="auditFact('${f.id}')">
+              🔬 Audit Quote Provenance
+            </button>
+          </div>
+        `).join('');
+
+        factsListHtml = `
+          <div class="doc-facts-box">
+            <h4>
+              <span>Extracted Epistemic Fact Atoms (${doc.facts.length})</span>
+              <span style="font-size: 0.72rem; color: #94A3B8; text-transform: none;">Click any fact to audit provenance</span>
+            </h4>
+            ${items}
+          </div>
+        `;
+      }
+    }
+
+    return `
+      <div class="doc-card" id="custom-doc-${doc.document_id}">
+        <div class="doc-card-header">
+          <div class="doc-card-title-group">
+            <div class="doc-file-icon" style="background: rgba(16, 185, 129, 0.12); color: #10B981;">📄</div>
+            <div>
+              <h3 class="doc-card-title">${doc.document_id}</h3>
+              <div class="doc-card-sub">
+                <span>📅 Ingested: ${dateFormatted}</span>
+                <span>📦 Size: ${sizeKb} KB</span>
+              </div>
+            </div>
+          </div>
+          <div class="doc-meta-pills">
+            <span class="meta-pill" style="background: rgba(16, 185, 129, 0.15); color: #10B981; border-color: rgba(16, 185, 129, 0.3); font-weight: 700;">✨ Custom Upload</span>
+            <span class="meta-pill">📄 ${doc.total_pages} Pages</span>
+            <span class="meta-pill meta-pill-highlight">⚡ ${doc.extracted_facts_count} Facts</span>
+            <span class="meta-pill">✓ Grounded</span>
+          </div>
+        </div>
+        <div class="doc-actions">
+          <button class="btn btn-sm btn-outline" onclick="toggleDocFacts('${doc.document_id}', true)">
+            ${isExpanded ? '▲ Hide Extracted Facts' : `▼ Inspect Extracted Facts (${doc.extracted_facts_count})`}
+          </button>
+        </div>
+        ${factsListHtml}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleDocFacts(docId, isCustom = false) {
   if (expandedDocIds.has(docId)) {
     expandedDocIds.delete(docId);
   } else {
     expandedDocIds.add(docId);
   }
-  renderDocumentsView();
+  if (isCustom) {
+    renderCustomDocumentsView();
+  } else {
+    renderDocumentsView();
+  }
 }
 
 /* Render All Facts Registry View */
@@ -548,8 +668,8 @@ async function submitUpload() {
     await fetchState();
     await fetchDocuments();
 
-    // Switch to dedicated Ingested Documents page!
-    switchView('documents');
+    // Switch to dedicated Custom Uploads page!
+    switchView('custom');
 
     showToast(`Successfully ingested "${selectedFile.name}"! (${result.pages_processed} pages, ${result.facts_extracted} facts)`);
   } catch (err) {

@@ -60,6 +60,7 @@ class DocumentSummary(BaseModel):
     upload_timestamp: str
     is_benchmark: bool = Field(default=False)
     benchmark_name: Optional[str] = Field(default=None)
+    facts: List[FactAtom] = Field(default_factory=list)
 
 
 class KnowledgeLayerState(BaseModel):
@@ -68,4 +69,7 @@ class KnowledgeLayerState(BaseModel):
     total_verdicts: int
     verdict_counts: Dict[str, int]
     verdicts: List[ReconciliationVerdict]
-    all_facts: List[FactAtom]
+    all_facts: List[FactAtom] = Field(default_factory=list)
+    active_benchmark: str = Field(default="delhivery")
+    custom_documents_count: int = Field(default=0)
+    custom_facts_count: int = Field(default=0)

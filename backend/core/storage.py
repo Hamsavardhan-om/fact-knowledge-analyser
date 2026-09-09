@@ -96,10 +96,8 @@ class KnowledgeStore:
                     is_benchmark=False
                 )
                 self.custom_documents[doc_summary.document_id] = doc_summary
-                self.documents[doc_summary.document_id] = doc_summary
                 for f in facts:
                     self.custom_facts[f.id] = f
-                    self.facts[f.id] = f
                 print(f"[KnowledgeStore] Auto-restored upload: {pdf_path.name} with {len(facts)} facts")
             except Exception as e:
                 print(f"[KnowledgeStore] Failed to auto-restore {pdf_path.name}: {e}")
@@ -112,26 +110,19 @@ class KnowledgeStore:
             try:
                 with open(STORAGE_FILE, "r", encoding="utf-8") as f:
                     data = json.load(f)
+                    self.active_benchmark = data.get("active_benchmark", "delhivery")
                     for doc in data.get("documents", []):
                         d = DocumentSummary(**doc)
-                        self.documents[d.document_id] = d
-                        if not d.is_benchmark:
-                            self.custom_documents[d.document_id] = d
+                        if d.is_benchmark:
+                            self.documents[d.document_id] = d
                     for fact in data.get("all_facts", []):
                         fa = FactAtom(**fact)
-                        self.facts[fa.id] = fa
-                        if fa.document_id in self.custom_documents:
-                            self.custom_facts[fa.id] = fa
+                        if fa.document_id in self.documents:
+                            self.facts[fa.id] = fa
                     for v in data.get("verdicts", []):
                         self.verdicts.append(ReconciliationVerdict(**v))
             except Exception as e:
                 print(f"[KnowledgeStore] Error loading storage.json: {e}")
-
-        # Ensure custom uploads are merged into store
-        for doc_id, doc in self.custom_documents.items():
-            self.documents[doc_id] = doc
-        for f_id, fact in self.custom_facts.items():
-            self.facts[f_id] = fact
 
     def save_to_disk(self):
         state = self.get_state()
@@ -142,7 +133,8 @@ class KnowledgeStore:
     def load_benchmark(self, dataset_name: str) -> bool:
         """
         Loads precomputed golden benchmarks (delhivery or india-macroeconomy).
-        Crucially PRESERVES any user-uploaded custom PDFs and facts!
+        Contains strictly ONLY the 3 pre-ingested benchmark documents.
+        Custom uploads remain safely isolated in self.custom_documents.
         """
         filename = "delhivery_benchmark.json" if "delhi" in dataset_name.lower() else "macro_benchmark.json"
         bench_file = BENCHMARKS_DIR / filename
@@ -152,41 +144,44 @@ class KnowledgeStore:
         with open(bench_file, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # 1. Reset state to ONLY custom user-uploaded documents and facts
-        self.documents = dict(self.custom_documents)
-        self.facts = dict(self.custom_facts)
+        # Strictly clear active benchmark store - do NOT merge custom uploads here!
+        self.documents.clear()
+        self.facts.clear()
         self.verdicts.clear()
 
-        # 2. Add the benchmark facts and documents
+        # Metadata dictionary for exact page counts and file sizes
+        doc_meta = {
+            "01-delhivery-prospectus-2022-excerpt.pdf": {"pages": 100, "size": 1597612},
+            "02-delhivery-annual-report-fy24-excerpt.pdf": {"pages": 100, "size": 6679023},
+            "03-delhivery-q4-fy24-earnings-presentation.pdf": {"pages": 27, "size": 1988328},
+            "01-india-economic-survey-2024-25-excerpt.pdf": {"pages": 89, "size": 3920928},
+            "02-rbi-annual-report-2024-25-excerpt.pdf": {"pages": 100, "size": 1507769},
+            "03-imf-india-2025-article-iv-excerpt.pdf": {"pages": 95, "size": 4305245},
+        }
+
+        self.active_benchmark = "delhivery" if "delhi" in dataset_name.lower() else "india-macroeconomy"
+
+        # Add benchmark facts and documents
         for f_data in data.get("facts", []):
             f = FactAtom(**f_data)
             self.facts[f.id] = f
             if f.document_id not in self.documents:
+                meta = doc_meta.get(f.document_id, {"pages": 100, "size": 1024 * 1024})
                 self.documents[f.document_id] = DocumentSummary(
                     document_id=f.document_id,
-                    total_pages=100,
+                    total_pages=meta["pages"],
                     extracted_facts_count=0,
-                    file_size_bytes=1024 * 1024,
+                    file_size_bytes=meta["size"],
                     upload_timestamp=datetime.now().isoformat(),
                     is_benchmark=True,
-                    benchmark_name=dataset_name
+                    benchmark_name="delhivery" if "delhi" in dataset_name.lower() else "india-macroeconomy"
                 )
             self.documents[f.document_id].extracted_facts_count += 1
+            self.documents[f.document_id].facts.append(f)
 
-        # 3. Add golden verdicts from benchmark
+        # Add golden verdicts from benchmark
         for v_data in data.get("verdicts", []):
             self.verdicts.append(ReconciliationVerdict(**v_data))
-
-        # 4. If custom facts exist, cluster all facts and reconcile
-        if self.custom_facts:
-            all_clusters = self.aligner.cluster_facts(list(self.facts.values()))
-            custom_verdicts = self.reconciler.reconcile_all_clusters(all_clusters)
-            existing_ids = {v.id for v in self.verdicts}
-            for cv in custom_verdicts:
-                if cv.id not in existing_ids:
-                    # Include if it touches custom facts
-                    if any(cf.document_id in self.custom_documents for cf in cv.facts):
-                        self.verdicts.append(cv)
 
         self.save_to_disk()
         return True
@@ -198,21 +193,13 @@ class KnowledgeStore:
         and re-evaluates reconciliation graph.
         """
         doc_summary.is_benchmark = False
+        doc_summary.facts = list(new_facts)
         self.custom_documents[doc_summary.document_id] = doc_summary
-        self.documents[doc_summary.document_id] = doc_summary
 
         for f in new_facts:
             self.custom_facts[f.id] = f
-            self.facts[f.id] = f
 
-        # Cluster all facts
-        clusters = self.aligner.cluster_facts(list(self.facts.values()))
-
-        # Reconcile multi-document clusters
-        new_verdicts = self.reconciler.reconcile_all_clusters(clusters)
-        self.verdicts = new_verdicts
-
-        self.save_to_disk()
+        self._save_custom_uploads()
 
     def get_state(self) -> KnowledgeLayerState:
         verdict_counts = {
@@ -228,5 +215,37 @@ class KnowledgeStore:
             total_verdicts=len(self.verdicts),
             verdict_counts=verdict_counts,
             verdicts=self.verdicts,
-            all_facts=list(self.facts.values())
+            all_facts=list(self.facts.values()),
+            active_benchmark=getattr(self, "active_benchmark", "delhivery"),
+            custom_documents_count=len(self.custom_documents),
+            custom_facts_count=len(self.custom_facts)
+        )
+
+    def get_custom_state(self) -> KnowledgeLayerState:
+        custom_docs_list = list(self.custom_documents.values())
+        custom_facts_list = list(self.custom_facts.values())
+
+        # If multiple custom docs exist, compute reconciliation verdicts between them
+        custom_verdicts = []
+        if len(custom_docs_list) > 1 and len(custom_facts_list) > 1:
+            clusters = self.aligner.cluster_facts(custom_facts_list)
+            custom_verdicts = self.reconciler.reconcile_all_clusters(clusters)
+
+        verdict_counts = {
+            VerdictType.CORROBORATED.value: sum(1 for v in custom_verdicts if v.verdict_type == VerdictType.CORROBORATED),
+            VerdictType.GENUINE_CONTRADICTION.value: sum(1 for v in custom_verdicts if v.verdict_type == VerdictType.GENUINE_CONTRADICTION),
+            VerdictType.APPARENT_CONTRADICTION.value: sum(1 for v in custom_verdicts if v.verdict_type == VerdictType.APPARENT_CONTRADICTION),
+            VerdictType.EXTRACTION_FAILURE.value: sum(1 for v in custom_verdicts if v.verdict_type == VerdictType.EXTRACTION_FAILURE),
+        }
+
+        return KnowledgeLayerState(
+            documents=custom_docs_list,
+            total_facts=len(custom_facts_list),
+            total_verdicts=len(custom_verdicts),
+            verdict_counts=verdict_counts,
+            verdicts=custom_verdicts,
+            all_facts=custom_facts_list,
+            active_benchmark="custom",
+            custom_documents_count=len(custom_docs_list),
+            custom_facts_count=len(custom_facts_list)
         )

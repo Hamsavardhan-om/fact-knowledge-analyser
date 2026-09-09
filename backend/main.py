@@ -52,8 +52,14 @@ if not store.facts:
 
 @app.get("/api/state", response_model=KnowledgeLayerState)
 def get_knowledge_state():
-    """Returns the current state of documents, facts, and reconciliation verdicts."""
+    """Returns the current state of benchmark documents, facts, and reconciliation verdicts."""
     return store.get_state()
+
+
+@app.get("/api/custom-state", response_model=KnowledgeLayerState)
+def get_custom_knowledge_state():
+    """Returns the state of user-uploaded documents, facts, and reconciliation verdicts."""
+    return store.get_custom_state()
 
 
 @app.get("/api/facts", response_model=List[FactAtom])
@@ -63,7 +69,7 @@ def get_facts(
     search: Optional[str] = None
 ):
     """Query facts with optional filtering."""
-    facts = list(store.facts.values())
+    facts = list(store.facts.values()) + list(store.custom_facts.values())
     if doc_id:
         facts = [f for f in facts if doc_id.lower() in f.document_id.lower()]
     if entity:
@@ -75,17 +81,34 @@ def get_facts(
 
 
 @app.get("/api/documents")
-def get_documents_with_facts():
-    """Returns all ingested documents along with their extracted facts."""
+def get_documents_with_facts(source: str = Query(default="benchmark")):
+    """Returns documents along with their extracted facts.
+    source='benchmark': returns only the active benchmark dataset documents (3 documents).
+    source='custom': returns only user-uploaded documents.
+    source='all': returns both.
+    """
+    target_docs = {}
+    target_facts = {}
+
+    if source in ("benchmark", "all"):
+        target_docs.update(store.documents)
+        target_facts.update(store.facts)
+
+    if source in ("custom", "all"):
+        target_docs.update(store.custom_documents)
+        target_facts.update(store.custom_facts)
+
     docs = []
-    for doc_id, doc in store.documents.items():
-        doc_facts = [f for f in store.facts.values() if f.document_id == doc_id]
+    for doc_id, doc in target_docs.items():
+        doc_facts = [f for f in target_facts.values() if f.document_id == doc_id]
         docs.append({
             "document_id": doc.document_id,
             "total_pages": doc.total_pages,
             "extracted_facts_count": len(doc_facts),
             "file_size_bytes": doc.file_size_bytes,
             "upload_timestamp": doc.upload_timestamp,
+            "is_benchmark": doc.is_benchmark,
+            "benchmark_name": doc.benchmark_name,
             "facts": [f.model_dump() for f in doc_facts]
         })
     return docs
@@ -112,7 +135,7 @@ def load_dataset(name: str):
 async def upload_pdf(file: UploadFile = File(...)):
     """
     Accepts arbitrary PDF uploads, extracts structured facts,
-    and updates the cross-document reconciliation graph incrementally.
+    and updates the user's custom upload knowledge layer.
     """
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF documents are supported")
@@ -138,17 +161,20 @@ async def upload_pdf(file: UploadFile = File(...)):
         total_pages=len(pages),
         extracted_facts_count=len(new_facts),
         file_size_bytes=dest_path.stat().st_size,
-        upload_timestamp=datetime.now().isoformat()
+        upload_timestamp=datetime.now().isoformat(),
+        is_benchmark=False,
+        benchmark_name=None,
+        facts=new_facts
     )
 
-    # 3. Ingest incrementally into KnowledgeStore
+    # 3. Ingest incrementally into KnowledgeStore (custom uploads isolated)
     store.ingest_facts(doc_summary, new_facts)
 
     return {
         "message": f"Successfully ingested {file.filename}",
         "pages_processed": len(pages),
         "facts_extracted": len(new_facts),
-        "total_verdicts": len(store.verdicts)
+        "custom_documents_count": len(store.custom_documents)
     }
 
 
@@ -157,7 +183,7 @@ def audit_provenance(fact_id: str):
     """
     Case 4 Auditor: Verifies whether a fact's quote is grounded in the source PDF.
     """
-    fact = store.facts.get(fact_id)
+    fact = store.facts.get(fact_id) or store.custom_facts.get(fact_id)
     if not fact:
         raise HTTPException(status_code=404, detail="Fact not found")
 

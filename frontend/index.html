@@ -37,7 +37,10 @@
           </button>
           <button class="nav-link" id="navReconcile" onclick="switchView('reconcile')">Reconciliation Engine</button>
           <button class="nav-link" id="navDocuments" onclick="switchView('documents')">
-            Ingested Documents <span class="badge-count" id="navDocCount">0</span>
+            Benchmark Documents <span class="badge-count" id="navDocCount">3</span>
+          </button>
+          <button class="nav-link" id="navCustom" onclick="switchView('custom')">
+            Custom Uploads <span class="badge-count" id="navCustomCount">1</span>
           </button>
           <button class="nav-link" id="navFacts" onclick="switchView('facts')">
             Fact Registry <span class="badge-count" id="navFactCount">0</span>
@@ -52,10 +55,6 @@
           <button class="btn btn-sm btn-outline active" id="btnLoadDelhivery" onclick="loadBenchmark('delhivery')">Delhivery</button>
           <button class="btn btn-sm btn-outline" id="btnLoadMacro" onclick="loadBenchmark('india-macroeconomy')">India Macro</button>
         </div>
-        <button class="btn btn-sm btn-primary" onclick="openUploadModal()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Ingest New PDF
-        </button>
       </div>
     </header>
 
@@ -98,10 +97,17 @@
     <!-- METRICS BANNER (Shown for Explorer, Documents, and Facts) -->
     <section id="metricsSection" class="metrics-grid hidden">
       <div class="metric-card" onclick="switchView('documents')">
-        <div class="metric-icon docs-icon">📄</div>
+        <div class="metric-icon docs-icon">🏷️</div>
         <div class="metric-content">
-          <span class="metric-label">Ingested Documents</span>
-          <span class="metric-val" id="statDocs">0</span>
+          <span class="metric-label">Benchmark Docs</span>
+          <span class="metric-val" id="statDocs">3</span>
+        </div>
+      </div>
+      <div class="metric-card" onclick="switchView('custom')">
+        <div class="metric-icon docs-icon" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">✨</div>
+        <div class="metric-content">
+          <span class="metric-label">Custom Uploads</span>
+          <span class="metric-val" id="statCustomDocs">1</span>
         </div>
       </div>
       <div class="metric-card" onclick="switchView('facts')">
@@ -175,21 +181,35 @@
       </section>
     </main>
 
-    <!-- VIEW 2: Ingested Documents Page (Dedicated Separate Page) -->
+    <!-- VIEW 2: Pre-Ingested Benchmark Documents Page (Strictly 3 Benchmark Documents) -->
     <main id="viewDocuments" class="main-container hidden">
       <div class="view-header">
         <div>
-          <h2 class="view-title">Document Intelligence &amp; Ingestion Registry</h2>
-          <p class="view-desc">Inspect all ingested PDF documents, layout parsing metrics, page boundaries, and extracted epistemic facts.</p>
+          <h2 class="view-title">Pre-Ingested Benchmark Documents</h2>
+          <p class="view-desc">Curated ground-truth documents for the active benchmark dataset. Strictly pre-ingested and isolated from user uploads.</p>
         </div>
-        <button class="btn btn-sm btn-primary" onclick="openUploadModal()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Ingest Another PDF
-        </button>
       </div>
 
       <section id="documentsList" class="documents-grid">
-        <!-- Rendered dynamically -->
+        <!-- Rendered dynamically with strictly 3 benchmark documents -->
+      </section>
+    </main>
+
+    <!-- VIEW 4: Custom User Uploads Page (Separate Dedicated Section) -->
+    <main id="viewCustom" class="main-container hidden">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Custom Document Uploads &amp; Intelligence</h2>
+          <p class="view-desc">Ingest arbitrary PDF files to parse layout, extract grounded epistemic claims, and verify evidence quotes in an isolated workspace.</p>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="openUploadModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Ingest New PDF
+        </button>
+      </div>
+
+      <section id="customDocumentsList" class="documents-grid">
+        <!-- Rendered dynamically with custom user uploads -->
       </section>
     </main>
 
