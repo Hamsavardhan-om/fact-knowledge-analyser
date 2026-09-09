@@ -27,6 +27,7 @@ class KnowledgeStore:
         self.verdicts: List[ReconciliationVerdict] = []
         self.custom_documents: Dict[str, DocumentSummary] = {}
         self.custom_facts: Dict[str, FactAtom] = {}
+        self.custom_verdicts: List[ReconciliationVerdict] = []
         self.aligner = DiscourseAligner()
         self.reconciler = DialecticReconciler()
         self._load_custom_uploads()
@@ -67,11 +68,12 @@ class KnowledgeStore:
     def _auto_restore_raw_uploads(self):
         """Scans raw_uploads for user-uploaded PDFs and extracts facts if not already present."""
         from backend.core.perception import DocumentPerception
-        from backend.core.extractor import FactExtractor
+        from backend.core.extractor import EpistemicExtractor
 
         if not UPLOADS_DIR.exists():
             return
 
+        extractor = EpistemicExtractor()
         for pdf_path in UPLOADS_DIR.glob("*.pdf"):
             if "delhivery" in pdf_path.name.lower() or "macro" in pdf_path.name.lower():
                 continue
@@ -81,12 +83,7 @@ class KnowledgeStore:
                 pages = DocumentPerception.parse_pdf(pdf_path)
                 facts = []
                 for p in pages:
-                    p_facts = FactExtractor.extract_facts_from_page(
-                        page_text=p["text"],
-                        page_number=p["page_number"],
-                        document_id=pdf_path.name,
-                        tables=p.get("tables", [])
-                    )
+                    p_facts = extractor.extract_from_page(p)
                     facts.extend(p_facts)
 
                 doc_summary = DocumentSummary(
@@ -203,6 +200,52 @@ class KnowledgeStore:
 
         self._save_custom_uploads()
 
+    def delete_custom_document(self, doc_id: str) -> bool:
+        """
+        Deletes a custom document, its extracted facts, its persisted file,
+        and clears custom reconciliation verdicts.
+        """
+        if doc_id not in self.custom_documents:
+            return False
+
+        # 1. Remove from documents map
+        del self.custom_documents[doc_id]
+
+        # 2. Remove associated facts
+        fact_ids_to_del = [fid for fid, f in self.custom_facts.items() if f.document_id == doc_id]
+        for fid in fact_ids_to_del:
+            del self.custom_facts[fid]
+
+        # 3. Clear custom verdicts so rerunning knows state has changed
+        self.custom_verdicts.clear()
+
+        # 4. Remove physical file from UPLOADS_DIR if present
+        target_file = UPLOADS_DIR / doc_id
+        if target_file.exists():
+            try:
+                target_file.unlink()
+            except Exception as e:
+                print(f"[KnowledgeStore] Error deleting file {target_file}: {e}")
+
+        # 5. Persist to custom_uploads.json
+        self._save_custom_uploads()
+        return True
+
+    def clear_all_custom_documents(self) -> int:
+        """
+        Deletes all custom documents, facts, uploaded files, and verdicts.
+        """
+        count = len(self.custom_documents)
+        doc_ids = list(self.custom_documents.keys())
+        for doc_id in doc_ids:
+            self.delete_custom_document(doc_id)
+
+        self.custom_documents.clear()
+        self.custom_facts.clear()
+        self.custom_verdicts.clear()
+        self._save_custom_uploads()
+        return count
+
     def get_state(self) -> KnowledgeLayerState:
         verdict_counts = {
             VerdictType.CORROBORATED.value: sum(1 for v in self.verdicts if v.verdict_type == VerdictType.CORROBORATED),
@@ -223,31 +266,96 @@ class KnowledgeStore:
             custom_facts_count=len(self.custom_facts)
         )
 
+    def reconcile_custom_uploads(self) -> List[ReconciliationVerdict]:
+        """Runs the 4-case dialectic reconciliation over custom uploaded documents."""
+        facts = list(self.custom_facts.values())
+        docs = list(self.custom_documents.values())
+        self.custom_verdicts = self.reconciler.reconcile_custom_facts(facts, docs)
+        return self.custom_verdicts
+
     def get_custom_state(self) -> KnowledgeLayerState:
         custom_docs_list = list(self.custom_documents.values())
         custom_facts_list = list(self.custom_facts.values())
 
-        # If multiple custom docs exist, compute reconciliation verdicts between them
-        custom_verdicts = []
-        if len(custom_docs_list) > 1 and len(custom_facts_list) > 1:
-            clusters = self.aligner.cluster_facts(custom_facts_list)
-            custom_verdicts = self.reconciler.reconcile_all_clusters(clusters)
+        if not self.custom_verdicts and custom_facts_list:
+            self.reconcile_custom_uploads()
 
+        verdicts = self.custom_verdicts
         verdict_counts = {
-            VerdictType.CORROBORATED.value: sum(1 for v in custom_verdicts if v.verdict_type == VerdictType.CORROBORATED),
-            VerdictType.GENUINE_CONTRADICTION.value: sum(1 for v in custom_verdicts if v.verdict_type == VerdictType.GENUINE_CONTRADICTION),
-            VerdictType.APPARENT_CONTRADICTION.value: sum(1 for v in custom_verdicts if v.verdict_type == VerdictType.APPARENT_CONTRADICTION),
-            VerdictType.EXTRACTION_FAILURE.value: sum(1 for v in custom_verdicts if v.verdict_type == VerdictType.EXTRACTION_FAILURE),
+            VerdictType.CORROBORATED.value: sum(1 for v in verdicts if v.verdict_type == VerdictType.CORROBORATED),
+            VerdictType.GENUINE_CONTRADICTION.value: sum(1 for v in verdicts if v.verdict_type == VerdictType.GENUINE_CONTRADICTION),
+            VerdictType.APPARENT_CONTRADICTION.value: sum(1 for v in verdicts if v.verdict_type == VerdictType.APPARENT_CONTRADICTION),
+            VerdictType.EXTRACTION_FAILURE.value: sum(1 for v in verdicts if v.verdict_type == VerdictType.EXTRACTION_FAILURE),
         }
 
         return KnowledgeLayerState(
             documents=custom_docs_list,
             total_facts=len(custom_facts_list),
-            total_verdicts=len(custom_verdicts),
+            total_verdicts=len(verdicts),
             verdict_counts=verdict_counts,
-            verdicts=custom_verdicts,
+            verdicts=verdicts,
             all_facts=custom_facts_list,
             active_benchmark="custom",
             custom_documents_count=len(custom_docs_list),
             custom_facts_count=len(custom_facts_list)
         )
+
+    def get_section_state(self, section: str) -> Dict:
+        """
+        Retrieves the isolated state for a specific section:
+        'delhivery', 'india-macroeconomy', or 'custom'.
+        """
+        sec = section.lower()
+        if "delhi" in sec:
+            if getattr(self, "active_benchmark", "") != "delhivery" or not self.verdicts:
+                self.load_benchmark("delhivery")
+            verdicts = self.verdicts
+            docs = list(self.documents.values())
+            facts = list(self.facts.values())
+        elif "macro" in sec or "india" in sec:
+            if getattr(self, "active_benchmark", "") != "india-macroeconomy" or not self.verdicts:
+                self.load_benchmark("india-macroeconomy")
+            verdicts = self.verdicts
+            docs = list(self.documents.values())
+            facts = list(self.facts.values())
+        else: # custom
+            if not self.custom_documents:
+                return {
+                    "section": "custom",
+                    "documents": [],
+                    "total_documents": 0,
+                    "total_facts": 0,
+                    "total_verdicts": 0,
+                    "verdict_counts": {
+                        VerdictType.CORROBORATED.value: 0,
+                        VerdictType.GENUINE_CONTRADICTION.value: 0,
+                        VerdictType.APPARENT_CONTRADICTION.value: 0,
+                        VerdictType.EXTRACTION_FAILURE.value: 0,
+                    },
+                    "verdicts": [],
+                    "facts": [],
+                    "error": "File is missing. Please upload at least one PDF to run comparison."
+                }
+            if not self.custom_verdicts:
+                self.reconcile_custom_uploads()
+            verdicts = self.custom_verdicts
+            docs = list(self.custom_documents.values())
+            facts = list(self.custom_facts.values())
+
+        verdict_counts = {
+            VerdictType.CORROBORATED.value: sum(1 for v in verdicts if v.verdict_type == VerdictType.CORROBORATED),
+            VerdictType.GENUINE_CONTRADICTION.value: sum(1 for v in verdicts if v.verdict_type == VerdictType.GENUINE_CONTRADICTION),
+            VerdictType.APPARENT_CONTRADICTION.value: sum(1 for v in verdicts if v.verdict_type == VerdictType.APPARENT_CONTRADICTION),
+            VerdictType.EXTRACTION_FAILURE.value: sum(1 for v in verdicts if v.verdict_type == VerdictType.EXTRACTION_FAILURE),
+        }
+
+        return {
+            "section": sec,
+            "documents": [d.model_dump() for d in docs],
+            "total_documents": len(docs),
+            "total_facts": len(facts),
+            "total_verdicts": len(verdicts),
+            "verdict_counts": verdict_counts,
+            "verdicts": [v.model_dump() for v in verdicts],
+            "facts": [f.model_dump() for f in facts]
+        }

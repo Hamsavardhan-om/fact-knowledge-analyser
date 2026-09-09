@@ -1,6 +1,6 @@
 # Epistemic Fact Knowledge Layer (EFKL)
 
-> **Superjoin Engineering Intern Hiring Assignment Solution**  
+> **Epistemic Fact Knowledge Layer & Dialectic Reconciliation Engine**  
 > An autonomous, schema-agnostic knowledge layer that extracts grounded facts from multi-page documents, links assertions to verbatim source evidence, and reconciles cross-document relationships through multi-tier dialectic reasoning.
 
 ---

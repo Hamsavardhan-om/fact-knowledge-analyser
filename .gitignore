@@ -5,3 +5,4 @@ __pycache__/
 backend/data/raw_uploads/*
 !backend/data/raw_uploads/.gitkeep
 .env
+project_context.md

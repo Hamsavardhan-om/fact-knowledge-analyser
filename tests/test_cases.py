@@ -1,5 +1,5 @@
 """
-Verification tests for the 4 Mandatory Hiring Assignment Cases:
+Verification tests for the 4 Mandatory Epistemic Reconciliation Cases:
 1. Corroborated fact across documents, even if expressed differently.
 2. A genuine or likely contradiction.
 3. An apparent contradiction explained by context (time, scope, or units).

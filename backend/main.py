@@ -115,11 +115,62 @@ def get_documents_with_facts(source: str = Query(default="benchmark")):
 
 
 @app.get("/api/verdicts", response_model=List[ReconciliationVerdict])
-def get_verdicts(verdict_type: Optional[VerdictType] = None):
-    """Get reconciliation verdicts, optionally filtered by the 4 challenge case types."""
+def get_verdicts(verdict_type: Optional[VerdictType] = None, section: Optional[str] = None):
+    """Get reconciliation verdicts, optionally filtered by the 4 challenge case types and section."""
+    target_verdicts = store.custom_verdicts if section == "custom" else store.verdicts
     if verdict_type:
-        return [v for v in store.verdicts if v.verdict_type == verdict_type]
-    return store.verdicts
+        return [v for v in target_verdicts if v.verdict_type == verdict_type]
+    return target_verdicts
+
+
+@app.post("/api/reconcile/{section}")
+@app.get("/api/reconcile/{section}")
+def reconcile_section(section: str):
+    """
+    Executes or fetches the 4-case dialectic reconciliation for a specific section:
+    - 'delhivery': Returns Delhivery's 6 golden benchmark verdicts.
+    - 'india-macroeconomy': Returns India Macro's 6 golden benchmark verdicts.
+    - 'custom': Runs dynamic 4-case dialectic reconciliation over custom uploads.
+    """
+    sec = section.lower()
+    if "delhi" in sec:
+        store.load_benchmark("delhivery")
+        return store.get_section_state("delhivery")
+    elif "macro" in sec or "india" in sec:
+        store.load_benchmark("india-macroeconomy")
+        return store.get_section_state("india-macroeconomy")
+    elif "custom" in sec:
+        if not store.custom_documents:
+            raise HTTPException(
+                status_code=404,
+                detail="File is missing. Please upload at least one PDF to run comparison."
+            )
+        store.reconcile_custom_uploads()
+        return store.get_section_state("custom")
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown section '{section}'. Use 'delhivery', 'india-macroeconomy', or 'custom'.")
+
+
+@app.delete("/api/custom-documents/{doc_id}")
+def delete_custom_document(doc_id: str):
+    """Deletes a custom uploaded document and its extracted facts."""
+    success = store.delete_custom_document(doc_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Custom document '{doc_id}' not found")
+    return {
+        "message": f"Successfully deleted document '{doc_id}'",
+        "remaining_custom_documents": len(store.custom_documents)
+    }
+
+
+@app.delete("/api/custom-documents")
+def clear_all_custom_documents():
+    """Clears all custom uploaded documents and facts."""
+    count = store.clear_all_custom_documents()
+    return {
+        "message": f"Successfully deleted all {count} custom documents",
+        "remaining_custom_documents": 0
+    }
 
 
 @app.post("/api/load-dataset/{name}")
@@ -184,6 +235,23 @@ def audit_provenance(fact_id: str):
     Case 4 Auditor: Verifies whether a fact's quote is grounded in the source PDF.
     """
     fact = store.facts.get(fact_id) or store.custom_facts.get(fact_id)
+    if not fact:
+        # Check precomputed benchmarks if fact belongs to an inactive dataset
+        from backend.config import BENCHMARKS_DIR
+        import json
+        for bench_file in BENCHMARKS_DIR.glob("*.json"):
+            try:
+                with open(bench_file, "r", encoding="utf-8") as f:
+                    b_data = json.load(f)
+                    for f_dict in b_data.get("facts", []):
+                        if f_dict.get("id") == fact_id:
+                            fact = FactAtom(**f_dict)
+                            break
+                if fact:
+                    break
+            except Exception:
+                pass
+
     if not fact:
         raise HTTPException(status_code=404, detail="Fact not found")
 

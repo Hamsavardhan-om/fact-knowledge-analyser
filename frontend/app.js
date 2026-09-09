@@ -12,6 +12,20 @@ let factsSearchQuery = '';
 let selectedFile = null;
 let expandedDocIds = new Set();
 
+// Multi-document Dialectic Reconciliation by Section
+let activeReconcileSection = 'delhivery'; // 'delhivery' | 'india-macroeconomy' | 'custom'
+let currentBenchmarkName = 'delhivery';
+let sectionExecutionState = {
+  delhivery: false,
+  'india-macroeconomy': false,
+  custom: false
+};
+let sectionData = {
+  delhivery: null,
+  'india-macroeconomy': null,
+  custom: null
+};
+
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   switchView('landing');
@@ -61,9 +75,14 @@ async function fetchState() {
     const res = await fetch('/api/state');
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     currentState = await res.json();
-    renderDashboard();
+    if (currentState && currentState.active_benchmark) {
+      currentBenchmarkName = currentState.active_benchmark;
+    }
     renderFactsView();
     updateNavCounts();
+    if (currentView === 'reconcile') {
+      renderDashboard();
+    }
   } catch (err) {
     console.error('Failed to fetch state:', err);
     const container = document.getElementById('verdictsList');
@@ -89,6 +108,9 @@ async function fetchDocuments() {
     renderDocumentsView();
     renderCustomDocumentsView();
     updateNavCounts();
+    if (currentView === 'reconcile' && !sectionExecutionState[activeReconcileSection]) {
+      renderReconcileHero(activeReconcileSection);
+    }
   } catch (err) {
     console.error('Failed to fetch documents:', err);
   }
@@ -103,9 +125,11 @@ function updateNavCounts() {
   const navCustom = document.getElementById('navCustomCount');
   const navFact = document.getElementById('navFactCount');
   const statFacts = document.getElementById('statFacts');
+  const recCustomBadge = document.getElementById('reconcileCustomDocBadge');
 
   if (navDoc) navDoc.textContent = benchDocCount;
   if (navCustom) navCustom.textContent = customDocCount;
+  if (recCustomBadge) recCustomBadge.textContent = `${customDocCount} Docs`;
   if (navFact) navFact.textContent = factCount;
   if (statFacts) statFacts.textContent = factCount;
 }
@@ -176,27 +200,334 @@ function switchView(viewName) {
   } else if (viewName === 'facts') {
     renderFactsView();
   } else if (viewName === 'reconcile') {
-    renderDashboard();
+    updateSectionTabs();
+    if (sectionExecutionState[activeReconcileSection] && sectionData[activeReconcileSection]) {
+      renderDashboard();
+    } else {
+      renderReconcileHero(activeReconcileSection);
+    }
   }
 }
 
-function renderDashboard() {
-  if (!currentState) return;
+function switchReconcileSection(sectionName) {
+  activeReconcileSection = sectionName;
+  updateSectionTabs();
 
-  // 1. Update Metrics Banner
-  const statFacts = document.getElementById('statFacts');
-  if (statFacts) statFacts.textContent = currentState.total_facts;
+  // Reset filter when switching section
+  currentFilter = 'ALL';
+  document.querySelectorAll('.filter-pills .pill').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === 'ALL');
+  });
+
+  if (sectionExecutionState[sectionName] && sectionData[sectionName]) {
+    renderDashboard();
+  } else {
+    renderReconcileHero(sectionName);
+  }
+}
+
+function updateSectionTabs() {
+  const tabDelhi = document.getElementById('secTabDelhivery');
+  const tabMacro = document.getElementById('secTabMacro');
+  const tabCustom = document.getElementById('secTabCustom');
+
+  if (tabDelhi) tabDelhi.classList.toggle('active', activeReconcileSection === 'delhivery');
+  if (tabMacro) tabMacro.classList.toggle('active', activeReconcileSection === 'india-macroeconomy');
+  if (tabCustom) tabCustom.classList.toggle('active', activeReconcileSection === 'custom');
+}
+
+function renderReconcileHero(sec) {
+  const container = document.getElementById('verdictsList');
+  if (!container) return;
+
+  const filterPills = document.getElementById('reconcileFilterPills');
+  const headerActions = document.getElementById('reconcileHeaderActions');
+  if (headerActions) headerActions.innerHTML = '';
+  if (filterPills) filterPills.style.opacity = '0.5';
+
+  // Update top metrics to prompt execution
   const statCorr = document.getElementById('statCorroborated');
-  if (statCorr) statCorr.textContent = currentState.verdict_counts.CORROBORATED || 0;
   const statContr = document.getElementById('statContradictions');
-  if (statContr) statContr.textContent = currentState.verdict_counts.GENUINE_CONTRADICTION || 0;
   const statApp = document.getElementById('statApparent');
-  if (statApp) statApp.textContent = currentState.verdict_counts.APPARENT_CONTRADICTION || 0;
   const statFail = document.getElementById('statFailures');
-  if (statFail) statFail.textContent = currentState.verdict_counts.EXTRACTION_FAILURE || 0;
+  if (statCorr) statCorr.textContent = '—';
+  if (statContr) statContr.textContent = '—';
+  if (statApp) statApp.textContent = '—';
+  if (statFail) statFail.textContent = '—';
 
-  // 2. Filter Verdicts
-  let filtered = currentState.verdicts;
+  let scopeBadge = '';
+  let title = '';
+  let desc = '';
+  let docsHtml = '';
+  let btnLabel = '';
+
+  if (sec === 'delhivery') {
+    scopeBadge = '📦 Benchmark Dataset &bull; 3 Documents';
+    title = 'Delhivery Corporate &amp; IPO Filings Dialectic Comparison';
+    desc = 'Cross-examine 3 statutory Delhivery filings (IPO Prospectus 2022, Annual Report FY24, and Q4 FY24 Presentation). The dialectic engine evaluates shipment volume historical corroboration, PIN code reach temporal drift, EBITDA perimeter scope definitions, and audited layout parsing artifacts.';
+    docsHtml = `
+      <div class="reconcile-doc-pill">
+        <span class="pill-num">Doc A</span>
+        <span>01-delhivery-prospectus-2022-excerpt.pdf (100 Pages)</span>
+      </div>
+      <div class="reconcile-doc-pill">
+        <span class="pill-num">Doc B</span>
+        <span>02-delhivery-annual-report-fy24-excerpt.pdf (100 Pages)</span>
+      </div>
+      <div class="reconcile-doc-pill">
+        <span class="pill-num">Doc C</span>
+        <span>03-delhivery-q4-fy24-earnings-presentation.pdf (27 Pages)</span>
+      </div>
+    `;
+    btnLabel = '⚡ Run Dialectic Comparison (Delhivery)';
+  } else if (sec === 'india-macroeconomy') {
+    scopeBadge = '🇮🇳 Benchmark Dataset &bull; 3 Documents';
+    title = 'India Macroeconomy Filings Dialectic Comparison';
+    desc = 'Cross-examine 3 sovereign and multilateral macroeconomic filings (Union Economic Survey 2024-25, RBI Annual Report 2024-25, and IMF Article IV 2025). The dialectic engine evaluates Real GDP growth corroboration, forex reserves institutional contradiction, headline vs core inflation scope divergence, and audited OCR table artifacts.';
+    docsHtml = `
+      <div class="reconcile-doc-pill">
+        <span class="pill-num">Doc A</span>
+        <span>01-india-economic-survey-2024-25-excerpt.pdf (89 Pages)</span>
+      </div>
+      <div class="reconcile-doc-pill">
+        <span class="pill-num">Doc B</span>
+        <span>02-rbi-annual-report-2024-25-excerpt.pdf (100 Pages)</span>
+      </div>
+      <div class="reconcile-doc-pill">
+        <span class="pill-num">Doc C</span>
+        <span>03-imf-india-2025-article-iv-excerpt.pdf (95 Pages)</span>
+      </div>
+    `;
+    btnLabel = '⚡ Run Dialectic Comparison (India Macro)';
+  } else { // custom
+    const numDocs = currentCustomDocs.length;
+    if (numDocs === 0) {
+      scopeBadge = `⚠️ Custom Uploads Registry &bull; 0 Documents`;
+      title = 'File is missing';
+      desc = 'Cannot run comparison: custom uploaded file is missing. Please ingest at least one PDF to execute cross-document dialectic reconciliation.';
+      docsHtml = `
+        <div style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 1.5rem; text-align: center; color: #FCA5A5; max-width: 500px; margin: 0 auto 1.5rem auto;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄❌</div>
+          <strong style="color: #EF4444; font-size: 1.1rem; display: block; margin-bottom: 0.25rem;">File is missing</strong>
+          <p style="font-size: 0.85rem; color: #94A3B8; margin: 0;">No custom files available. Please upload a PDF to run dialectic reconciliation.</p>
+        </div>
+      `;
+      btnLabel = '📁 Ingest New PDF (File is missing)';
+    } else {
+      scopeBadge = `✨ Custom Uploads Registry &bull; ${numDocs} Document${numDocs === 1 ? '' : 's'}`;
+      title = 'Custom Uploaded Documents Dialectic Comparison';
+      desc = `Synthesize multi-tier dialectic analysis across ${numDocs} user-uploaded PDF file${numDocs === 1 ? '' : 's'}. Cross-examines corroborations across sections, identifies genuine requirement conflicts, resolves candidate track scope differences, and audits layout line-wrap artifacts.`;
+      docsHtml = currentCustomDocs.map((d, i) => `
+        <div class="reconcile-doc-pill">
+          <span class="pill-num" style="background: rgba(16, 185, 129, 0.2); color: #10B981;">Doc ${String.fromCharCode(65 + i)}</span>
+          <span>${escapeHtml(d.document_id)} (${d.total_pages} Pages, ${d.extracted_facts_count} Facts)</span>
+        </div>
+      `).join('');
+      btnLabel = '⚡ Run Dialectic Comparison (Custom Uploads)';
+    }
+  }
+
+  container.innerHTML = `
+    <div class="reconcile-hero-card">
+      <div class="hero-scope-badge">${scopeBadge}</div>
+      <h3>${title}</h3>
+      <p>${desc}</p>
+      <div class="reconcile-doc-pills-list">
+        ${docsHtml}
+      </div>
+      <div>
+        <button class="btn-hero-compare" onclick="${(sec === 'custom' && currentCustomDocs.length === 0) ? 'openUploadModal()' : `runSectionComparison('${sec}')`}">
+          ${btnLabel}
+        </button>
+      </div>
+      <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+        <span class="hero-chip" style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.25);">✓ Case 1: Corroborated</span>
+        <span class="hero-chip" style="font-size: 0.75rem; background: rgba(239, 68, 68, 0.1); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.25);">✗ Case 2: Genuine Contradiction</span>
+        <span class="hero-chip" style="font-size: 0.75rem; background: rgba(245, 158, 11, 0.1); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.25);">⚖️ Case 3: Apparent Contradiction</span>
+        <span class="hero-chip" style="font-size: 0.75rem; background: rgba(168, 85, 247, 0.1); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.25);">🔍 Case 4: Audited Failures</span>
+      </div>
+    </div>
+  `;
+}
+
+async function runSectionComparison(sec) {
+  const targetSec = sec || activeReconcileSection;
+  const container = document.getElementById('verdictsList');
+  if (!container) return;
+
+  // Intercept if custom uploads are empty
+  if (targetSec === 'custom' && (!currentCustomDocs || currentCustomDocs.length === 0)) {
+    container.innerHTML = `
+      <div class="verdict-card" style="border-color: #EF4444; padding: 2.5rem; text-align: center; background: rgba(239, 68, 68, 0.05);">
+        <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">⚠️</div>
+        <h3 style="color: #EF4444; margin-bottom: 0.5rem; font-size: 1.35rem;">File is missing</h3>
+        <p style="color: #94A3B8; font-size: 0.95rem; max-width: 500px; margin: 0 auto 1.25rem auto;">
+          File is missing. Please upload at least one PDF to run comparison.
+        </p>
+        <button class="btn btn-primary" onclick="openUploadModal()">
+          📁 Ingest New PDF
+        </button>
+      </div>
+    `;
+    showToast('File is missing. Please upload at least one PDF to run comparison.');
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="reconcile-progress-box">
+      <div class="reconcile-spinner"></div>
+      <h4 style="color: var(--text-primary); margin-bottom: 0.4rem; font-size: 1.15rem;">
+        Running Dialectic Reconciliation Engine
+      </h4>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+        Cross-examining documents across 4 challenge dimensions...
+      </p>
+      <div class="progress-steps-list">
+        <div class="progress-step-item active" id="pstep1"><span>⏳</span> 1. Semantic discourse alignment &amp; entity clustering...</div>
+        <div class="progress-step-item" id="pstep2"><span>⏳</span> 2. Contextual dimension decomposition (Time, Scope, Units)...</div>
+        <div class="progress-step-item" id="pstep3"><span>⏳</span> 3. Isolating genuine contradictions vs apparent reconciliations...</div>
+        <div class="progress-step-item" id="pstep4"><span>⏳</span> 4. Adversarial coordinate audits for extraction failures...</div>
+      </div>
+    </div>
+  `;
+
+  const stepDelay = (ms) => new Promise(res => setTimeout(res, ms));
+  const updateStep = (stepNum) => {
+    const prev = document.getElementById(`pstep${stepNum - 1}`);
+    const curr = document.getElementById(`pstep${stepNum}`);
+    if (prev) {
+      prev.classList.remove('active');
+      prev.classList.add('completed');
+      const span = prev.querySelector('span');
+      if (span) span.textContent = '✓';
+    }
+    if (curr) {
+      curr.classList.add('active');
+      const span = curr.querySelector('span');
+      if (span) span.textContent = '⏳';
+    }
+  };
+
+  try {
+    const fetchPromise = fetch(`/api/reconcile/${targetSec}`, { method: 'POST' })
+      .then(async res => {
+        if (!res.ok) {
+          let errMsg = `Reconciliation failed: status ${res.status}`;
+          try {
+            const errJson = await res.json();
+            errMsg = errJson.detail || errMsg;
+          } catch (e) {}
+          throw new Error(errMsg);
+        }
+        return res.json();
+      });
+
+    await stepDelay(120);
+    updateStep(2);
+    await stepDelay(120);
+    updateStep(3);
+    await stepDelay(120);
+    updateStep(4);
+
+    const data = await fetchPromise;
+    const lastStep = document.getElementById('pstep4');
+    if (lastStep) {
+      lastStep.classList.remove('active');
+      lastStep.classList.add('completed');
+      const span = lastStep.querySelector('span');
+      if (span) span.textContent = '✓';
+    }
+    await stepDelay(150);
+
+    sectionData[targetSec] = data;
+    sectionExecutionState[targetSec] = true;
+    activeReconcileSection = targetSec;
+    updateSectionTabs();
+    renderDashboard();
+
+    const sectionLabels = {
+      delhivery: 'Delhivery',
+      'india-macroeconomy': 'India Macro',
+      custom: 'Custom Uploads'
+    };
+    showToast(`Dialectic comparison completed for ${sectionLabels[targetSec] || targetSec}! (${data.total_verdicts} verdicts across 4 cases)`);
+  } catch (err) {
+    console.error('Error running section reconciliation:', err);
+    const msg = err.message || '';
+    const isMissing = msg.toLowerCase().includes('file is missing') || msg.toLowerCase().includes('missing');
+
+    if (isMissing) {
+      container.innerHTML = `
+        <div class="verdict-card" style="border-color: #EF4444; padding: 2.5rem; text-align: center; background: rgba(239, 68, 68, 0.05);">
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">⚠️</div>
+          <h3 style="color: #EF4444; margin-bottom: 0.5rem; font-size: 1.35rem;">File is missing</h3>
+          <p style="color: #94A3B8; font-size: 0.95rem; max-width: 500px; margin: 0 auto 1.25rem auto;">
+            File is missing. Please upload at least one PDF to run comparison.
+          </p>
+          <button class="btn btn-primary" onclick="openUploadModal()">
+            📁 Ingest New PDF
+          </button>
+        </div>
+      `;
+      showToast('File is missing. Please upload at least one PDF to run comparison.');
+    } else {
+      container.innerHTML = `
+        <div class="verdict-card" style="border-color: #EF4444; padding: 2rem; text-align: center;">
+          <h4 style="color: #EF4444; margin-bottom: 0.5rem;">Comparison Execution Error</h4>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">${err.message}</p>
+          <button class="btn btn-sm btn-outline" onclick="runSectionComparison('${targetSec}')">Try Again</button>
+        </div>
+      `;
+    }
+  }
+}
+
+function goToReconcileSection(sec) {
+  switchView('reconcile');
+  switchReconcileSection(sec);
+}
+
+function goToCurrentBenchmarkReconcile() {
+  const activeBenchmark = (currentState && currentState.active_benchmark) ? currentState.active_benchmark : currentBenchmarkName;
+  goToReconcileSection(activeBenchmark);
+}
+
+function renderDashboard() {
+  const filterPills = document.getElementById('reconcileFilterPills');
+  if (filterPills) filterPills.style.opacity = '1';
+
+  // Check if active section has run
+  if (!sectionExecutionState[activeReconcileSection] || !sectionData[activeReconcileSection]) {
+    renderReconcileHero(activeReconcileSection);
+    return;
+  }
+
+  const data = sectionData[activeReconcileSection];
+
+  // 1. Update Metrics Banner with this section's statistics
+  const statFacts = document.getElementById('statFacts');
+  if (statFacts) statFacts.textContent = data.total_facts || (currentState ? currentState.total_facts : 0);
+  const statCorr = document.getElementById('statCorroborated');
+  if (statCorr) statCorr.textContent = (data.verdict_counts && data.verdict_counts.CORROBORATED) || 0;
+  const statContr = document.getElementById('statContradictions');
+  if (statContr) statContr.textContent = (data.verdict_counts && data.verdict_counts.GENUINE_CONTRADICTION) || 0;
+  const statApp = document.getElementById('statApparent');
+  if (statApp) statApp.textContent = (data.verdict_counts && data.verdict_counts.APPARENT_CONTRADICTION) || 0;
+  const statFail = document.getElementById('statFailures');
+  if (statFail) statFail.textContent = (data.verdict_counts && data.verdict_counts.EXTRACTION_FAILURE) || 0;
+
+  // 2. Update Header Actions
+  const headerActions = document.getElementById('reconcileHeaderActions');
+  if (headerActions) {
+    headerActions.innerHTML = `
+      <button class="btn btn-sm btn-outline" onclick="runSectionComparison('${activeReconcileSection}')" title="Re-run dialectic reconciliation engine">
+        ↺ Re-run Comparison
+      </button>
+    `;
+  }
+
+  // 3. Filter Verdicts
+  let filtered = data.verdicts || [];
   if (currentFilter !== 'ALL') {
     filtered = filtered.filter(v => v.verdict_type === currentFilter);
   }
@@ -211,7 +542,7 @@ function renderDashboard() {
     );
   }
 
-  // 3. Render Verdicts List
+  // 4. Render Verdicts List
   const container = document.getElementById('verdictsList');
   if (filtered.length === 0) {
     container.innerHTML = `
@@ -456,9 +787,12 @@ function renderCustomDocumentsView() {
             <span class="meta-pill">✓ Grounded</span>
           </div>
         </div>
-        <div class="doc-actions">
+        <div class="doc-actions" style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
           <button class="btn btn-sm btn-outline" onclick="toggleDocFacts('${safeDocId}', true)">
             ${isExpanded ? '▲ Hide Extracted Facts' : `▼ Inspect Extracted Facts (${doc.extracted_facts_count})`}
+          </button>
+          <button class="btn btn-sm btn-outline" onclick="deleteCustomDocument('${safeDocId}')" style="border-color: #EF4444; color: #EF4444; font-weight: 600;" title="Delete this custom document">
+            🗑️ Delete
           </button>
         </div>
         ${factsListHtml}
@@ -478,6 +812,63 @@ function toggleDocFacts(encodedOrPlainDocId, isCustom = false) {
     renderCustomDocumentsView();
   } else {
     renderDocumentsView();
+  }
+}
+
+async function deleteCustomDocument(encodedOrPlainDocId) {
+  const docId = decodeURIComponent(encodedOrPlainDocId);
+  if (!confirm(`Are you sure you want to delete "${docId}" and its extracted facts?`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/custom-documents/${encodeURIComponent(docId)}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) throw new Error(`Failed to delete: status ${res.status}`);
+
+    sectionExecutionState['custom'] = false;
+    sectionData['custom'] = null;
+
+    showToast(`Deleted "${docId}" successfully!`);
+    await fetchDocuments();
+    await fetchState();
+
+    if (currentView === 'custom') {
+      renderCustomDocumentsView();
+    } else if (currentView === 'reconcile' && activeReconcileSection === 'custom') {
+      renderReconcileHero('custom');
+    }
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
+  }
+}
+
+async function clearAllCustomDocuments() {
+  if (!confirm('Are you sure you want to delete ALL custom uploaded documents and facts?')) {
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/custom-documents', {
+      method: 'DELETE'
+    });
+    if (!res.ok) throw new Error(`Failed to clear: status ${res.status}`);
+
+    sectionExecutionState['custom'] = false;
+    sectionData['custom'] = null;
+
+    showToast('All custom uploaded documents have been deleted!');
+    await fetchDocuments();
+    await fetchState();
+
+    if (currentView === 'custom') {
+      renderCustomDocumentsView();
+    } else if (currentView === 'reconcile' && activeReconcileSection === 'custom') {
+      renderReconcileHero('custom');
+    }
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
   }
 }
 
@@ -571,6 +962,7 @@ function handleSearch() {
 }
 
 async function loadBenchmark(datasetName) {
+  currentBenchmarkName = datasetName;
   const btnDelhi = document.getElementById('btnLoadDelhivery');
   const btnMacro = document.getElementById('btnLoadMacro');
   if (btnDelhi) btnDelhi.classList.toggle('active', datasetName.includes('delhi'));
@@ -581,7 +973,6 @@ async function loadBenchmark(datasetName) {
     if (!res.ok) throw new Error('Failed to load dataset');
     const data = await res.json();
     currentState = data.state;
-    renderDashboard();
     renderFactsView();
     await fetchDocuments();
     updateNavCounts();
@@ -702,6 +1093,10 @@ async function submitUpload() {
     
     // Automatically expand the newly uploaded document
     expandedDocIds.add(selectedFile.name);
+
+    // Reset custom comparison state so newly uploaded document is included
+    sectionExecutionState['custom'] = false;
+    sectionData['custom'] = null;
 
     // Refresh state and documents list
     await fetchState();

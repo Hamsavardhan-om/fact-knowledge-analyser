@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Epistemic Fact Knowledge Layer (EFKL)</title>
-  <link rel="stylesheet" href="/static/style.css?v=3.5" />
+  <link rel="stylesheet" href="/static/style.css?v=3.7" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
           <div class="brand-badge">EFKL</div>
           <div class="brand-text">
             <h1>Fact Knowledge Layer</h1>
-            <span class="tagline">Superjoin VIT 2026 Hiring Assignment</span>
+            <span class="tagline">Autonomous Dialectic Reconciliation Engine</span>
           </div>
         </div>
         <!-- Main Navigation Links (Hidden on Landing) -->
@@ -144,7 +144,32 @@
         </div>
       </div>
 
-      <div class="filter-pills">
+      <!-- Section Navigation Bar in Reconciliation Engine -->
+      <div class="reconcile-section-bar">
+        <span class="section-bar-label">Analysis Scope:</span>
+        <div class="reconcile-section-tabs">
+          <button class="section-tab active" id="secTabDelhivery" onclick="switchReconcileSection('delhivery')">
+            <span class="tab-icon">📦</span>
+            <span class="tab-title">Delhivery Benchmark</span>
+            <span class="tab-badge">3 Docs</span>
+          </button>
+          <button class="section-tab" id="secTabMacro" onclick="switchReconcileSection('india-macroeconomy')">
+            <span class="tab-icon">🇮🇳</span>
+            <span class="tab-title">India Macro Benchmark</span>
+            <span class="tab-badge">3 Docs</span>
+          </button>
+          <button class="section-tab" id="secTabCustom" onclick="switchReconcileSection('custom')">
+            <span class="tab-icon">✨</span>
+            <span class="tab-title">Custom Uploads</span>
+            <span class="tab-badge" id="reconcileCustomDocBadge">2 Docs</span>
+          </button>
+        </div>
+        <div id="reconcileHeaderActions" class="reconcile-header-actions">
+          <!-- Populated when analysis has been run: e.g. Re-run button -->
+        </div>
+      </div>
+
+      <div class="filter-pills" id="reconcileFilterPills">
         <button class="pill active" data-filter="ALL" onclick="setFilter('ALL')">All Cases</button>
         <button class="pill pill-corr" data-filter="CORROBORATED" onclick="setFilter('CORROBORATED')">
           Case 1: Corroborated
@@ -160,7 +185,7 @@
         </button>
       </div>
 
-      <!-- Verdicts Stream -->
+      <!-- Verdicts Stream (Hero prompt or Verdict cards) -->
       <section id="verdictsList" class="verdicts-stream">
         <div class="loading-state">Loading knowledge layer...</div>
       </section>
@@ -177,6 +202,9 @@
           <span class="label">Benchmark:</span>
           <button class="btn btn-sm btn-outline active" id="btnLoadDelhivery" onclick="loadBenchmark('delhivery')">Delhivery</button>
           <button class="btn btn-sm btn-outline" id="btnLoadMacro" onclick="loadBenchmark('india-macroeconomy')">India Macro</button>
+          <button class="btn btn-sm btn-primary" id="btnCompareBenchmarkNav" onclick="goToCurrentBenchmarkReconcile()" style="margin-left: 0.5rem;">
+            ⚡ Run Dialectic Comparison
+          </button>
         </div>
       </div>
 
@@ -192,10 +220,18 @@
           <h2 class="view-title">Custom Document Uploads &amp; Intelligence</h2>
           <p class="view-desc">Ingest arbitrary PDF files to parse layout, extract grounded epistemic claims, and verify evidence quotes in an isolated workspace.</p>
         </div>
-        <button class="btn btn-sm btn-primary" onclick="openUploadModal()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Ingest New PDF
-        </button>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-sm btn-outline" id="btnClearAllCustomDocs" onclick="clearAllCustomDocuments()" style="border-color: #EF4444; color: #EF4444; font-weight: 600;">
+            🗑️ Clear All Uploads
+          </button>
+          <button class="btn btn-sm btn-outline-success" onclick="goToReconcileSection('custom')" style="border-color: #10B981; color: #10B981; font-weight: 600;">
+            ⚡ Compare &amp; Reconcile Custom Documents
+          </button>
+          <button class="btn btn-sm btn-primary" onclick="openUploadModal()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Ingest New PDF
+          </button>
+        </div>
       </div>
 
       <!-- Quick Upload Dropzone Banner in Custom View -->
@@ -277,6 +313,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=3.5"></script>
+  <script src="/static/app.js?v=3.7"></script>
 </body>
 </html>
