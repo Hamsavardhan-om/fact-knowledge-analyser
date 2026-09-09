@@ -3,6 +3,7 @@
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Render_Cloud-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://fact-knowledge-analyser.onrender.com/)
+[![Video Demo](https://img.shields.io/badge/📹_Video_Demo-Google_Drive-FF5722?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1T2rBpWH-auXdp7GYglmv1N9w6yIirfgc?usp=sharing)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PyMuPDF](https://img.shields.io/badge/Engine-PyMuPDF%20%7C%20PDFPlumber-FF6F00?style=for-the-badge)](https://pymupdf.readthedocs.io/)
@@ -19,6 +20,10 @@
 > ### 🌐 **LIVE INTERACTIVE DEMO AVAILABLE NOW**
 > The complete application is deployed and live for immediate evaluation:  
 > 👉 **[https://fact-knowledge-analyser.onrender.com/](https://fact-knowledge-analyser.onrender.com/)**  
+> 
+> ### 📹 **VIDEO DEMO (SYSTEM WALKTHROUGH)**
+> Watch the video demonstration of the working system:  
+> 👉 **[Watch Video Demo (Google Drive)](https://drive.google.com/drive/folders/1T2rBpWH-auXdp7GYglmv1N9w6yIirfgc?usp=sharing)**  
 > 
 > *Test real-time PDF fact extraction, side-by-side evidence inspection, cross-document dialectic reconciliation, and adversarial provenance auditing directly in your browser — zero installation or API key required.*
 
@@ -212,7 +217,7 @@ Open your browser at:
 
 ## 📹 Video Demo
 
-> 🔗 **Video Demo Link:** [Watch the 3-Minute System Walkthrough](https://fact-knowledge-analyser.onrender.com/) *(or link your Loom / YouTube recording here)*
+> 🔗 **Video Demo Link:** [Watch the System Walkthrough Video on Google Drive](https://drive.google.com/drive/folders/1T2rBpWH-auXdp7GYglmv1N9w6yIirfgc?usp=sharing)
 
 ### Summary of What is Shown in the 3-Minute Demo:
 1. **Live Deployment & Interface (0:00 - 0:30):**  
