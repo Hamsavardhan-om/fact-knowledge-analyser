@@ -3,6 +3,7 @@
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Render_Cloud-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://fact-knowledge-analyser.onrender.com/)
+[![Video Demo](https://img.shields.io/badge/📹_Video_Demo-Google_Drive-FF5722?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1T2rBpWH-auXdp7GYglmv1N9w6yIirfgc?usp=sharing)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PyMuPDF](https://img.shields.io/badge/Engine-PyMuPDF%20%7C%20PDFPlumber-FF6F00?style=for-the-badge)](https://pymupdf.readthedocs.io/)
@@ -19,6 +20,10 @@
 > ### 🌐 **LIVE INTERACTIVE DEMO AVAILABLE NOW**
 > The complete application is deployed and live for immediate evaluation:  
 > 👉 **[https://fact-knowledge-analyser.onrender.com/](https://fact-knowledge-analyser.onrender.com/)**  
+> 
+> ### 📹 **VIDEO DEMO (SYSTEM WALKTHROUGH)**
+> Direct link to the complete walkthrough video demonstrating PDF processing and all required cases:  
+> 👉 **[Watch Video Demo on Google Drive](https://drive.google.com/drive/folders/1T2rBpWH-auXdp7GYglmv1N9w6yIirfgc?usp=sharing)**  
 > 
 > *Test real-time PDF fact extraction, side-by-side evidence inspection, cross-document dialectic reconciliation, and adversarial provenance auditing directly in your browser — zero installation or API key required.*
 
@@ -167,6 +172,21 @@ tests/test_reconciliation.py::test_custom_upload_persists_across_benchmark_swaps
 
 ======================= 14 passed in 1.76s =======================
 ```
+
+---
+
+## 📹 Video Demo
+
+> 🔗 **Direct Video Link:** [Watch the System Walkthrough Video on Google Drive](https://drive.google.com/drive/folders/1T2rBpWH-auXdp7GYglmv1N9w6yIirfgc?usp=sharing)
+
+### What is Demonstrated in the Walkthrough Video:
+1. **Live Deployment & Interface:** Overview of the live Render deployment (`https://fact-knowledge-analyser.onrender.com/`) and the 3-section layout (Delhivery, India Macro, Custom Uploads).
+2. **Benchmark Dialectic Reconciliation:** Running manual comparison for Delhivery to demonstrate **Case 1 (Corroborated 577.06M Volume)** and **Case 3 (PIN Codes Time Drift & Standalone/Consolidated Revenue Scope)**. Switching to India Macro to demonstrate **Case 2 (Forex Reserves $11.2B Genuine Contradiction)**.
+3. **Interactive Provenance Auditor:** Clicking the **Audit Provenance** button on a fact to verify character coordinate bounding and diagnose **Case 4 (Parenthesized Negative Value Extraction Trap)**.
+4. **Custom PDF Ingestion, Dynamic 4-Case Comparison & Deletion:** Uploading an arbitrary multi-page PDF, executing real-time fact extraction and 4-case comparison, deleting the upload, and demonstrating the reactive **"File is missing"** validation on rerun.
+5. **Architectural Highlights & Test Verification:** Displaying the 14 passing automated tests and clean offline testability.
+
+---
 
 ## 💡 Approach
 
