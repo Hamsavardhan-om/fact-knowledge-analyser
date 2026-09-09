@@ -279,9 +279,56 @@ Side-by-Side Evidence Inspection & Auditor Modal]
 
 ## 🔭 Limitations and Next Steps
 
-1. **Multi-Hop Transitive Reasoning:** The current dialectic engine evaluates cross-document pairs (Fact A, Fact B). Future extensions will implement graph-level transitive reconciliation (if $A = B$ and $B = C$, inferring multi-hop consistency across larger document networks).
-2. **Multimodal Raster Chart Parsing:** While vector tables and text blocks are extracted with full spatial coordinates, scanned raster image plots (without accessible text layers) could be augmented using vision-language models for coordinate-axis curve reading.
-3. **Automated Cross-Currency Real-Time Conversion:** While unit mismatches (e.g., INR Crores vs. USD Billions) are identified as divergence dimensions, integrating historical foreign exchange rate APIs would enable automated mathematical parity calculation.
+Being transparent about system limitations is crucial: real-world enterprise documents present complex edge cases where even human forensic accountants must dig deeper. Below is an honest, technically rigorous breakdown of where the current system's boundaries lie and how we plan to resolve them in future iterations:
+
+### 1. Pairwise vs. Multi-Hop Transitive Reconciliation (The Graph Traversal Limitation)
+- **Current Behavior:** The Dialectic Engine evaluates pairs of facts $(F_A, F_B)$ within topic clusters across documents.
+- **The Limitation:** It lacks **graph-level transitive constraint propagation** across $N > 2$ multi-step document chains.
+- **Concrete Failure Scenario:**
+  - *Doc 1 (2021):* Company A owns 100% of Subsidiary B.
+  - *Doc 2 (2023):* Subsidiary B is acquired by Entity C.
+  - *Doc 3 (2024):* Entity C disclaims all legacy liabilities of Subsidiary B.
+  - *What Happens:* The system reconciles $(Doc_1, Doc_2)$ and $(Doc_2, Doc_3)$ as separate pairwise events, but cannot automatically infer the multi-hop transitive syllogism (*"Does Company A retain legacy liability in 2024?"*).
+- **Planned Solution / Next Steps:** Evolve from pairwise classification to a **Probabilistic Graphical Model (PGM)** or **Constraint Satisfaction / SAT-Solver** over an epistemic knowledge graph, propagating truth and dependency bounds across arbitrary paths.
+
+### 2. Scanned Bitmaps & Infographic Charts (The Vector Perception Barrier)
+- **Current Behavior:** [`DocumentPerception`](backend/core/perception.py) uses PyMuPDF and `pdfplumber` to stream digital vector text layers, native font streams, and tabular grids with exact bounding boxes.
+- **The Limitation:** Scanned photocopy PDFs (without an embedded OCR text layer) and data rendered exclusively within **raster infographics** (e.g., trend curves, bar graphs, or scatter plots without accompanying tables) are currently unparsed.
+- **Concrete Failure Scenario:** An annual report includes an infographic titled *"Operating Margin Trajectory"*, where an operating margin of 14.2% is visually plotted on a chart axis but never printed in prose or table cells.
+- **Planned Solution / Next Steps:** Integrate a visual document intelligence layer (e.g., Gemini Multimodal Flash, Nougat, or LayoutLMv3) to perform visual coordinate-axis regression and visual question-answering over embedded chart imagery.
+
+### 3. Dynamic Multi-Currency & Historical Epoch Parity (The Numeric Conversion Gap)
+- **Current Behavior:** The engine isolates currency and unit mismatches under the **`UNIT` divergence dimension** (e.g., distinguishing ₹8,141 Crores from $1.2 Billion), preventing false equality.
+- **The Limitation:** It identifies that the units differ, but does **not compute historical exchange rates or inflation-adjusted parity**.
+- **Concrete Failure Scenario:**
+  - *Doc 1 (FY21):* India's Forex Reserves reported as **₹42.8 Lakh Crore**.
+  - *Doc 2 (FY21):* India's Forex Reserves reported as **$577 Billion**.
+  - *What Happens:* At the prevailing historical rate of ~₹74.2/USD, these two disclosures actually corroborate mathematically! However, EFKL flags them under `UNIT` divergence rather than auto-verifying numerical parity.
+- **Planned Solution / Next Steps:** Build a **Dynamic Quantitative Normalizer** equipped with historical FX spot tables (RBI/Federal Reserve historical data) and CPI deflators to automatically verify cross-currency and constant-vs-current price parity.
+
+### 4. Remote Footnotes & Accounting Policy Linkage (The Spatial Proximity Disconnect)
+- **Current Behavior:** Extracts table cells and body claims while capturing immediate local context (`context_window` of surrounding rows/headers).
+- **The Limitation:** In complex financial statements, the most critical qualifications are printed as tiny superscripts linking to a footnote 60 lines below at the bottom of the page (e.g., `*Note 14(b): Excludes discontinued European operations`).
+- **Concrete Failure Scenario:** A table cell reports *"Total Revenue: ₹10,000 Cr"*, while a tiny footnote at the page footer notes *"Includes ₹1,200 Cr of one-off real estate liquidation"*. If the extractor captures the table cell without binding the distant footnote, the scope qualification is lost.
+- **Planned Solution / Next Steps:** Implement a **Hierarchical Footnote Binder** that uses geometric PDF coordinates to detect superscript symbols (`*`, `†`, numbers) and automatically appends the corresponding footer text to the fact's contextual metadata.
+
+### 5. Offline Heuristic Fallback vs. Highly Abstract Narrative Prose
+- **Current Behavior:** Dual execution engine: Gemini 2.5 Flash when an API key is present, backed by a deterministic regex/lexical parser for zero-credential offline evaluation.
+- **The Limitation:** The offline heuristic parser is optimized for structured disclosures (financial metrics, percentages, balance sheets, fiscal years, batches, PIN codes). When fed purely abstract literary prose or narrative legal contracts without numerical markers, the offline parser extracts fewer claims than the LLM.
+- **Planned Solution / Next Steps:** Bundle a localized, lightweight quantized ONNX model (e.g., MiniLM with semantic role labeling) to ensure rich open-domain claim extraction occurs offline even on purely conversational text.
+
+---
+
+### Summary: Limitations vs. Production Roadmap
+
+| Dimension | Current Limitation | Technical Root Cause | Planned Production Solution |
+| :--- | :--- | :--- | :--- |
+| **Reasoning Scope** | Pairwise comparison $(F_A, F_B)$ | Topic-level pair clustering | Constraint Satisfaction / Graph SAT-Solver |
+| **Visual Ingestion** | Vector text & tables only | Text-stream parser (PyMuPDF) | Multimodal Vision OCR & Chart Curve Reader |
+| **Currency Parity** | Flags unit mismatch without conversion | Static dimension classification | Historical FX & CPI Deflator API Integration |
+| **Distant Footnotes** | Local context window only | Spatial disconnect on page | Geometric Superscript-to-Footnote Binder |
+| **Offline Breadth** | Optimized for numerical/metric claims | Rule-based regex/lexical rules | Local Quantized ONNX Semantic Role Model |
+
 
 ---
 
