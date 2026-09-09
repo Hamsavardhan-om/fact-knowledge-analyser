@@ -144,40 +144,7 @@ EFKL resolves apparent contradictions by decomposing them into specific contextu
 
 ---
 
-## ⚙️ Setup and Run Instructions
-
-### Prerequisites
-- Python 3.10, 3.11, or 3.12
-- Git
-
-### 1. Clone & Setup Environment
-```bash
-git clone https://github.com/Hamsavardhan-om/fact-knowledge-analyser.git
-cd fact-knowledge-analyser
-
-# Create and activate virtual environment
-python -m venv .venv
-
-# On Windows:
-.\.venv\Scripts\activate
-# On Linux/macOS:
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 2. (Optional) Configure Frontier LLM
-EFKL runs **100% offline** out of the box. If you wish to use Google Gemini for custom PDF uploads:
-```bash
-# Windows PowerShell
-$env:GEMINI_API_KEY="your_gemini_api_key_here"
-
-# Linux / macOS
-export GEMINI_API_KEY="your_gemini_api_key_here"
-```
-
-### 3. Run Automated Test Suite
+## Run Automated Test Suite
 Run the 14 automated unit and integration tests:
 ```bash
 pytest -v
@@ -200,33 +167,6 @@ tests/test_reconciliation.py::test_custom_upload_persists_across_benchmark_swaps
 
 ======================= 14 passed in 1.76s =======================
 ```
-
-### 4. Launch the Application Locally
-```bash
-uvicorn backend.main:app --reload --port 8000
-```
-Open your browser at:  
-👉 **`http://localhost:8000`**
-
----
-
-## 📹 Video Demo
-
-> 🔗 **Video Demo Link:** [Watch the 3-Minute System Walkthrough](https://fact-knowledge-analyser.onrender.com/) *(or link your Loom / YouTube recording here)*
-
-### Summary of What is Shown in the 3-Minute Demo:
-1. **Live Deployment & Interface (0:00 - 0:30):**  
-   Accessing the live deployment on Render (`https://fact-knowledge-analyser.onrender.com/`). Overview of the 3-section layout (Delhivery, India Macro, Custom Uploads).
-2. **Benchmark Dialectic Reconciliation (0:30 - 1:15):**  
-   Triggering manual comparison for Delhivery to demonstrate **Case 1 (Corroborated 577.06M Volume)** and **Case 3 (PIN Codes Time Drift & Standalone/Consolidated Revenue Scope)**. Switching to India Macro to demonstrate **Case 2 (Forex Reserves $11.2B Genuine Contradiction)**.
-3. **Interactive Provenance Auditor (1:15 - 1:45):**  
-   Clicking the **Audit Provenance** button on a fact to open the modal, demonstrating character coordinate bounding and detection of **Case 4 (Parenthesized Negative Value Extraction Trap)**.
-4. **Custom PDF Ingestion, Dynamic 4-Case Comparison & Deletion (1:45 - 2:30):**  
-   Uploading an arbitrary recruitment document. System performs real-time perception, extracts facts, aligns topics, and computes custom 4-case comparison. Document is deleted, and re-running comparison reactively displays the warning card: **"File is missing. Please upload at least one PDF to run comparison."**
-5. **Architectural Highlights & Test Verification (2:30 - 3:00):**  
-   Displaying the 14 passing automated tests and clean offline testability.
-
----
 
 ## 💡 Approach
 
