@@ -3,7 +3,6 @@
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Render_Cloud-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://fact-knowledge-analyser.onrender.com/)
-[![Video Demo](https://img.shields.io/badge/📹_Video_Demo-Google_Drive-FF5722?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1T2rBpWH-auXdp7GYglmv1N9w6yIirfgc?usp=sharing)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PyMuPDF](https://img.shields.io/badge/Engine-PyMuPDF%20%7C%20PDFPlumber-FF6F00?style=for-the-badge)](https://pymupdf.readthedocs.io/)
@@ -20,10 +19,6 @@
 > ### 🌐 **LIVE INTERACTIVE DEMO AVAILABLE NOW**
 > The complete application is deployed and live for immediate evaluation:  
 > 👉 **[https://fact-knowledge-analyser.onrender.com/](https://fact-knowledge-analyser.onrender.com/)**  
-> 
-> ### 📹 **VIDEO DEMO (SYSTEM WALKTHROUGH)**
-> Watch the video demonstration of the working system:  
-> 👉 **[Watch Video Demo (Google Drive)](https://drive.google.com/drive/folders/1T2rBpWH-auXdp7GYglmv1N9w6yIirfgc?usp=sharing)**  
 > 
 > *Test real-time PDF fact extraction, side-by-side evidence inspection, cross-document dialectic reconciliation, and adversarial provenance auditing directly in your browser — zero installation or API key required.*
 
@@ -149,40 +144,7 @@ EFKL resolves apparent contradictions by decomposing them into specific contextu
 
 ---
 
-## ⚙️ Setup and Run Instructions
-
-### Prerequisites
-- Python 3.10, 3.11, or 3.12
-- Git
-
-### 1. Clone & Setup Environment
-```bash
-git clone https://github.com/Hamsavardhan-om/fact-knowledge-analyser.git
-cd fact-knowledge-analyser
-
-# Create and activate virtual environment
-python -m venv .venv
-
-# On Windows:
-.\.venv\Scripts\activate
-# On Linux/macOS:
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 2. (Optional) Configure Frontier LLM
-EFKL runs **100% offline** out of the box. If you wish to use Google Gemini for custom PDF uploads:
-```bash
-# Windows PowerShell
-$env:GEMINI_API_KEY="your_gemini_api_key_here"
-
-# Linux / macOS
-export GEMINI_API_KEY="your_gemini_api_key_here"
-```
-
-### 3. Run Automated Test Suite
+## Run Automated Test Suite
 Run the 14 automated unit and integration tests:
 ```bash
 pytest -v
@@ -205,33 +167,6 @@ tests/test_reconciliation.py::test_custom_upload_persists_across_benchmark_swaps
 
 ======================= 14 passed in 1.76s =======================
 ```
-
-### 4. Launch the Application Locally
-```bash
-uvicorn backend.main:app --reload --port 8000
-```
-Open your browser at:  
-👉 **`http://localhost:8000`**
-
----
-
-## 📹 Video Demo
-
-> 🔗 **Video Demo Link:** [Watch the System Walkthrough Video on Google Drive](https://drive.google.com/drive/folders/1T2rBpWH-auXdp7GYglmv1N9w6yIirfgc?usp=sharing)
-
-### Summary of What is Shown in the 3-Minute Demo:
-1. **Live Deployment & Interface (0:00 - 0:30):**  
-   Accessing the live deployment on Render (`https://fact-knowledge-analyser.onrender.com/`). Overview of the 3-section layout (Delhivery, India Macro, Custom Uploads).
-2. **Benchmark Dialectic Reconciliation (0:30 - 1:15):**  
-   Triggering manual comparison for Delhivery to demonstrate **Case 1 (Corroborated 577.06M Volume)** and **Case 3 (PIN Codes Time Drift & Standalone/Consolidated Revenue Scope)**. Switching to India Macro to demonstrate **Case 2 (Forex Reserves $11.2B Genuine Contradiction)**.
-3. **Interactive Provenance Auditor (1:15 - 1:45):**  
-   Clicking the **Audit Provenance** button on a fact to open the modal, demonstrating character coordinate bounding and detection of **Case 4 (Parenthesized Negative Value Extraction Trap)**.
-4. **Custom PDF Ingestion, Dynamic 4-Case Comparison & Deletion (1:45 - 2:30):**  
-   Uploading an arbitrary recruitment document. System performs real-time perception, extracts facts, aligns topics, and computes custom 4-case comparison. Document is deleted, and re-running comparison reactively displays the warning card: **"File is missing. Please upload at least one PDF to run comparison."**
-5. **Architectural Highlights & Test Verification (2:30 - 3:00):**  
-   Displaying the 14 passing automated tests and clean offline testability.
-
----
 
 ## 💡 Approach
 
