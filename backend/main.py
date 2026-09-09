@@ -227,5 +227,5 @@ if frontend_dir.exists():
 def serve_index():
     index_file = BASE_DIR / "frontend" / "index.html"
     if index_file.exists():
-        return FileResponse(index_file)
+        return FileResponse(index_file, headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
     return {"message": "Epistemic Fact Knowledge Layer API active"}

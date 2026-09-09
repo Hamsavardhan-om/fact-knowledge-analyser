@@ -47,6 +47,8 @@ class KnowledgeStore:
                     for fact in data.get("facts", []):
                         fa = FactAtom(**fact)
                         self.custom_facts[fa.id] = fa
+                        if fa.document_id in self.custom_documents:
+                            self.custom_documents[fa.document_id].facts.append(fa)
             except Exception as e:
                 print(f"[KnowledgeStore] Error loading custom_uploads.json: {e}")
 

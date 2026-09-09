@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Epistemic Fact Knowledge Layer (EFKL)</title>
-  <link rel="stylesheet" href="/static/style.css?v=2.5" />
+  <link rel="stylesheet" href="/static/style.css?v=3.5" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -50,11 +50,10 @@
 
       <!-- Nav Controls (Hidden on Landing) -->
       <div class="nav-controls hidden" id="mainNavControls">
-        <div class="dataset-switcher">
-          <span class="label">Benchmark:</span>
-          <button class="btn btn-sm btn-outline active" id="btnLoadDelhivery" onclick="loadBenchmark('delhivery')">Delhivery</button>
-          <button class="btn btn-sm btn-outline" id="btnLoadMacro" onclick="loadBenchmark('india-macroeconomy')">India Macro</button>
-        </div>
+        <button class="btn btn-sm btn-primary" onclick="openUploadModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Ingest New PDF
+        </button>
       </div>
     </header>
 
@@ -96,20 +95,6 @@
 
     <!-- METRICS BANNER (Shown for Explorer, Documents, and Facts) -->
     <section id="metricsSection" class="metrics-grid hidden">
-      <div class="metric-card" onclick="switchView('documents')">
-        <div class="metric-icon docs-icon">🏷️</div>
-        <div class="metric-content">
-          <span class="metric-label">Benchmark Docs</span>
-          <span class="metric-val" id="statDocs">3</span>
-        </div>
-      </div>
-      <div class="metric-card" onclick="switchView('custom')">
-        <div class="metric-icon docs-icon" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">✨</div>
-        <div class="metric-content">
-          <span class="metric-label">Custom Uploads</span>
-          <span class="metric-val" id="statCustomDocs">1</span>
-        </div>
-      </div>
       <div class="metric-card" onclick="switchView('facts')">
         <div class="metric-icon facts-icon">⚡</div>
         <div class="metric-content">
@@ -188,6 +173,11 @@
           <h2 class="view-title">Pre-Ingested Benchmark Documents</h2>
           <p class="view-desc">Curated ground-truth documents for the active benchmark dataset. Strictly pre-ingested and isolated from user uploads.</p>
         </div>
+        <div class="dataset-switcher">
+          <span class="label">Benchmark:</span>
+          <button class="btn btn-sm btn-outline active" id="btnLoadDelhivery" onclick="loadBenchmark('delhivery')">Delhivery</button>
+          <button class="btn btn-sm btn-outline" id="btnLoadMacro" onclick="loadBenchmark('india-macroeconomy')">India Macro</button>
+        </div>
       </div>
 
       <section id="documentsList" class="documents-grid">
@@ -206,6 +196,18 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           Ingest New PDF
         </button>
+      </div>
+
+      <!-- Quick Upload Dropzone Banner in Custom View -->
+      <div class="custom-quick-upload-card" onclick="openUploadModal()" style="cursor: pointer; margin-bottom: 1.5rem; background: var(--bg-surface); border: 2px dashed var(--border-strong); border-radius: var(--radius-md); padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; transition: border-color 0.2s ease;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div style="font-size: 2rem; background: rgba(16, 185, 129, 0.1); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10B981;">📁</div>
+          <div>
+            <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">Upload a new PDF to Custom Registry</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Click here or drag a PDF to parse layout, extract fact atoms, and verify quotes.</p>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-primary" style="pointer-events: none;">Browse Files</button>
       </div>
 
       <section id="customDocumentsList" class="documents-grid">
@@ -275,6 +277,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=2.5"></script>
+  <script src="/static/app.js?v=3.5"></script>
 </body>
 </html>

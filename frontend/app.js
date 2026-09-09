@@ -19,6 +19,30 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchDocuments();
   initAmbientBackground();
 
+  // Drag & drop support for upload dropzone
+  const dropZone = document.getElementById('dropZone');
+  if (dropZone) {
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#10B981';
+      dropZone.style.background = 'rgba(16, 185, 129, 0.05)';
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.style.borderColor = '';
+      dropZone.style.background = '';
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '';
+      dropZone.style.background = '';
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        selectedFile = e.dataTransfer.files[0];
+        document.getElementById('selectedFileName').textContent = `Selected: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(1)} KB)`;
+        document.getElementById('btnUploadSubmit').disabled = false;
+      }
+    });
+  }
+
   // Press Enter anywhere on the landing page to proceed
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && currentView === 'landing') {
@@ -78,16 +102,22 @@ function updateNavCounts() {
   const navDoc = document.getElementById('navDocCount');
   const navCustom = document.getElementById('navCustomCount');
   const navFact = document.getElementById('navFactCount');
-  const statDocs = document.getElementById('statDocs');
-  const statCustomDocs = document.getElementById('statCustomDocs');
   const statFacts = document.getElementById('statFacts');
 
   if (navDoc) navDoc.textContent = benchDocCount;
   if (navCustom) navCustom.textContent = customDocCount;
   if (navFact) navFact.textContent = factCount;
-  if (statDocs) statDocs.textContent = benchDocCount;
-  if (statCustomDocs) statCustomDocs.textContent = customDocCount;
   if (statFacts) statFacts.textContent = factCount;
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function switchView(viewName) {
@@ -130,7 +160,7 @@ function switchView(viewName) {
   if (viewCustom) viewCustom.classList.toggle('hidden', viewName !== 'custom');
   if (viewFacts) viewFacts.classList.toggle('hidden', viewName !== 'facts');
 
-  // Metrics banner is hidden on landing page, shown on explorer views
+  // Metrics banner is hidden on landing page, shown on all explorer and document views
   if (metricsSection) {
     metricsSection.classList.toggle('hidden', isLanding);
   }
@@ -138,8 +168,10 @@ function switchView(viewName) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (viewName === 'documents') {
+    renderDocumentsView();
     fetchDocuments();
   } else if (viewName === 'custom') {
+    renderCustomDocumentsView();
     fetchDocuments();
   } else if (viewName === 'facts') {
     renderFactsView();
@@ -152,14 +184,16 @@ function renderDashboard() {
   if (!currentState) return;
 
   // 1. Update Metrics Banner
-  document.getElementById('statDocs').textContent = currentBenchmarkDocs.length || (currentState.documents ? currentState.documents.length : 3);
-  const statCustom = document.getElementById('statCustomDocs');
-  if (statCustom) statCustom.textContent = currentCustomDocs.length;
-  document.getElementById('statFacts').textContent = currentState.total_facts;
-  document.getElementById('statCorroborated').textContent = currentState.verdict_counts.CORROBORATED || 0;
-  document.getElementById('statContradictions').textContent = currentState.verdict_counts.GENUINE_CONTRADICTION || 0;
-  document.getElementById('statApparent').textContent = currentState.verdict_counts.APPARENT_CONTRADICTION || 0;
-  document.getElementById('statFailures').textContent = currentState.verdict_counts.EXTRACTION_FAILURE || 0;
+  const statFacts = document.getElementById('statFacts');
+  if (statFacts) statFacts.textContent = currentState.total_facts;
+  const statCorr = document.getElementById('statCorroborated');
+  if (statCorr) statCorr.textContent = currentState.verdict_counts.CORROBORATED || 0;
+  const statContr = document.getElementById('statContradictions');
+  if (statContr) statContr.textContent = currentState.verdict_counts.GENUINE_CONTRADICTION || 0;
+  const statApp = document.getElementById('statApparent');
+  if (statApp) statApp.textContent = currentState.verdict_counts.APPARENT_CONTRADICTION || 0;
+  const statFail = document.getElementById('statFailures');
+  if (statFail) statFail.textContent = currentState.verdict_counts.EXTRACTION_FAILURE || 0;
 
   // 2. Filter Verdicts
   let filtered = currentState.verdicts;
@@ -340,7 +374,7 @@ function renderCustomDocumentsView() {
   const container = document.getElementById('customDocumentsList');
   if (!container) return;
 
-  if (currentCustomDocs.length === 0) {
+  if (!currentCustomDocs || currentCustomDocs.length === 0) {
     container.innerHTML = `
       <div class="doc-card" style="text-align: center; padding: 3rem;">
         <p style="color: #94A3B8; margin-bottom: 1rem;">No custom documents uploaded yet.</p>
@@ -352,12 +386,12 @@ function renderCustomDocumentsView() {
     return;
   }
 
-  container.innerHTML = currentCustomDocs.map(doc => {
+  container.innerHTML = currentCustomDocs.map((doc, idx) => {
     const isExpanded = expandedDocIds.has(doc.document_id);
     const sizeKb = (doc.file_size_bytes / 1024).toFixed(1);
-    const dateFormatted = new Date(doc.upload_timestamp).toLocaleString([], {
-      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
+    const dateFormatted = doc.upload_timestamp 
+      ? new Date(doc.upload_timestamp).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
+      : 'Recently Uploaded';
 
     let factsListHtml = '';
     if (isExpanded) {
@@ -371,18 +405,18 @@ function renderCustomDocumentsView() {
         const items = doc.facts.map(f => `
           <div class="fact-item-card">
             <div class="fact-item-header">
-              <span class="fact-item-title">${f.entity} &bull; ${f.attribute}</span>
+              <span class="fact-item-title">${escapeHtml(f.entity)} &bull; ${escapeHtml(f.attribute)}</span>
               <span class="page-badge">Page ${f.page_number}</span>
             </div>
-            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.4rem; align-items: center;">
-              <span class="fact-item-val">${f.value_raw}</span>
-              ${f.temporal_anchor ? `<span class="tag">⏱️ ${f.temporal_anchor}</span>` : ''}
-              ${f.scope ? `<span class="tag">🔍 ${f.scope}</span>` : ''}
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.4rem; align-items: center; flex-wrap: wrap;">
+              <span class="fact-item-val">${escapeHtml(f.value_raw)}</span>
+              ${f.temporal_anchor ? `<span class="tag">⏱️ ${escapeHtml(f.temporal_anchor)}</span>` : ''}
+              ${f.scope ? `<span class="tag">🔍 ${escapeHtml(f.scope)}</span>` : ''}
             </div>
             <div class="evidence-quote">
-              "${f.quote}"
+              "${escapeHtml(f.quote)}"
             </div>
-            <button class="btn-audit" style="margin-top: 0.4rem;" onclick="auditFact('${f.id}')">
+            <button class="btn-audit" style="margin-top: 0.4rem;" onclick="auditFact('${escapeHtml(f.id)}')">
               🔬 Audit Quote Provenance
             </button>
           </div>
@@ -400,13 +434,15 @@ function renderCustomDocumentsView() {
       }
     }
 
+    const safeDocId = encodeURIComponent(doc.document_id);
+
     return `
-      <div class="doc-card" id="custom-doc-${doc.document_id}">
+      <div class="doc-card" id="custom-doc-${idx}">
         <div class="doc-card-header">
           <div class="doc-card-title-group">
             <div class="doc-file-icon" style="background: rgba(16, 185, 129, 0.12); color: #10B981;">📄</div>
             <div>
-              <h3 class="doc-card-title">${doc.document_id}</h3>
+              <h3 class="doc-card-title">${escapeHtml(doc.document_id)}</h3>
               <div class="doc-card-sub">
                 <span>📅 Ingested: ${dateFormatted}</span>
                 <span>📦 Size: ${sizeKb} KB</span>
@@ -421,7 +457,7 @@ function renderCustomDocumentsView() {
           </div>
         </div>
         <div class="doc-actions">
-          <button class="btn btn-sm btn-outline" onclick="toggleDocFacts('${doc.document_id}', true)">
+          <button class="btn btn-sm btn-outline" onclick="toggleDocFacts('${safeDocId}', true)">
             ${isExpanded ? '▲ Hide Extracted Facts' : `▼ Inspect Extracted Facts (${doc.extracted_facts_count})`}
           </button>
         </div>
@@ -431,7 +467,8 @@ function renderCustomDocumentsView() {
   }).join('');
 }
 
-function toggleDocFacts(docId, isCustom = false) {
+function toggleDocFacts(encodedOrPlainDocId, isCustom = false) {
+  const docId = decodeURIComponent(encodedOrPlainDocId);
   if (expandedDocIds.has(docId)) {
     expandedDocIds.delete(docId);
   } else {
@@ -534,8 +571,10 @@ function handleSearch() {
 }
 
 async function loadBenchmark(datasetName) {
-  document.getElementById('btnLoadDelhivery').classList.toggle('active', datasetName.includes('delhi'));
-  document.getElementById('btnLoadMacro').classList.toggle('active', datasetName.includes('macro'));
+  const btnDelhi = document.getElementById('btnLoadDelhivery');
+  const btnMacro = document.getElementById('btnLoadMacro');
+  if (btnDelhi) btnDelhi.classList.toggle('active', datasetName.includes('delhi'));
+  if (btnMacro) btnMacro.classList.toggle('active', datasetName.includes('macro'));
 
   try {
     const res = await fetch(`/api/load-dataset/${datasetName}`, { method: 'POST' });
