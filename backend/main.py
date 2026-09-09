@@ -297,3 +297,10 @@ def serve_index():
     if index_file.exists():
         return FileResponse(index_file, headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
     return {"message": "Epistemic Fact Knowledge Layer API active"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=port)
